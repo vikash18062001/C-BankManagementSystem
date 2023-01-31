@@ -4,22 +4,23 @@ using static System.Console;
 public class AccountHolderMenu : BankingStaffMenu
 {
 
-	string? bankId;
-	string? accountId;
+	string? _bankId;
+	string? _accountId;
 	public new void HomePage(ref BankCreation bankCreation)
 	{
-		WriteLine("Enter the bankId");
-		string? login_bank_id = ReadLine();
+		WriteLine("Enter the _bankId");
+		string? loginBankId = ReadLine();
 		WriteLine("Enter the AccountId");
-		string? login_accountId = ReadLine();
+		string? loginAccountId = ReadLine();
 		WriteLine("Enter the password");
 		string? password = ReadLine();
-		bool isValid = validate(login_bank_id!, login_accountId!, password!);
-		if (isValid)
+		bool _IsValid = Validate(loginBankId!, loginAccountId!, password!);
+		if (_IsValid)
 		{
 			AccountService accountService = new AccountService();
 			while (true)
 			{
+
 				WriteLine("\n\n*****Account Holder Menu****\n\n");
 				WriteLine("Choose What You Want to Do\n");
 				WriteLine("1 : Deposit Amount");
@@ -32,6 +33,7 @@ public class AccountHolderMenu : BankingStaffMenu
 				string? inputString = input?.ToString();
 				string? id;
                 double money;
+
                 switch (inputString)
 				{
 					case "1":
@@ -39,33 +41,31 @@ public class AccountHolderMenu : BankingStaffMenu
 						id = ReadLine();
 						WriteLine("Enter amoun to Deposit");
                         money = Convert.ToDouble(ReadLine());
-                        accountService.deposit_money(id!,this.bankId!,money,false);
+                        accountService.DepositMoney(id!,this._bankId!,money,false);
 						break;
 					case "2":
 						WriteLine("Enter the AccountId");
 						id = ReadLine();
                         WriteLine("Enter amount to WithDraw");
                         money = Convert.ToDouble(ReadLine());
-                        accountService.withdraw_money(id!,this.bankId!,money,false);
+                        accountService.WithDrawMoney(id!,this._bankId!,money,false);
 						break;
 					case "3":
-						WriteLine("Enter bankid To which you want to transfer");
+						WriteLine("Enter _bankId To which you want to transfer");
 						string? bankId = ReadLine();
 						WriteLine("Enter AccountId of the user you want to transfer money");
 						string? accountId = ReadLine();
 						WriteLine("Enter Amount You want to Transfer");
 						double? amount = Convert.ToDouble(ReadLine());
-						accountService.transfer_fund(this.bankId!, bankId!, this.accountId!, accountId!, amount,ref bankCreation);
+						accountService.TransferFund(this._bankId!, bankId!, this._accountId!, accountId!, amount,ref bankCreation);
 						break;
 					case "4":
-						accountService.showTransactionHistory(this.accountId!,this.bankId!);
+						accountService.ShowTransactionHistory(this._accountId!,this._bankId!);
 						break;
 					case "5":
 						return;
 						
 				}
-
-
 			}
 		}
 		else
@@ -73,27 +73,21 @@ public class AccountHolderMenu : BankingStaffMenu
 			WriteLine("Invalid Credentials");
 			return;
 		}
-
-		// Add Validation for Invalid Input
-
-
 	}
-	public bool validate(string bankId,string accountId , string password)
+	public bool Validate(string bankId,string accountId , string password)
 	{
 		WriteLine(currentBankEmployee);
-		foreach(BankDetailsOfEmployee ob in currentBankEmployee)
+		foreach(BankDetailsOfEmployee detail in currentBankEmployee)
 		{
-			if (ob.bankId == bankId && ob.accountId == accountId && ob.password == password)
+			if (detail._bankId == bankId && detail._accountId == accountId && detail._password == password)
 			{
-				this.bankId = bankId;
-				this.accountId = accountId;
+				this._bankId = bankId;
+				this._accountId = accountId;
 				return true;
 			}
 		}
 		return false;
-	}
-	
-		
+	}		
 }
 
 

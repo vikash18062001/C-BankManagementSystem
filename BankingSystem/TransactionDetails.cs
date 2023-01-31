@@ -2,12 +2,12 @@
 
 public class TransactionDetails
 {
-	public string? transId;
-	public string? bankId= default;
-	public string? accountId = default;
-	public double? amount = default;
-	public bool isCredit= default;
-	public bool isFundTransfer;
+	public string? _transId;
+	public string? _bankId= default;
+	public string? _accountId = default;
+	public double? _amount = default;
+	public bool _isCredit= default;
+	public bool _isFundTransfer;
 }
 
 

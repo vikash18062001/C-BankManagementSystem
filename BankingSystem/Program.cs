@@ -8,9 +8,6 @@ using static System.Console;
             BankingStaffMenu bankingStaffMenu = new BankingStaffMenu();
             AccountHolderMenu accountHolderMenu = new AccountHolderMenu();
             BankCreation bankCreation = new BankCreation();
-            //WriteLine("Enter the BankName");
-            //string? bankName = ReadLine();
-            //WriteLine(bankName?.Substring(0, 3) + DateTime.Now.Date.ToOADate());
             while (true)
             {
                 WriteLine("****Banking Management System****");
@@ -26,7 +23,7 @@ using static System.Console;
                 switch (inputString)
                 {
                     case "0":
-                        bankCreation.create_bank();
+                        bankCreation.CreateBank();
                         break;
                     case "1":
                         bankingStaffMenu.HomePage(ref bankCreation);
