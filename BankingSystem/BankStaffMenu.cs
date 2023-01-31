@@ -28,8 +28,8 @@ public class BankingStaffMenu : BankCreation
                 WriteLine("1 : Creation of Account");
                 WriteLine("2 : Update an Account");
                 WriteLine("3 : Delete An Account");
-                WriteLine("4 : Add New Accepted Currency");
-                WriteLine("5 : Add Service Charge");
+                WriteLine("4 : Add Service Charge For Same Bank");
+                WriteLine("5 : Add Service Charge For Different Bank");
                 WriteLine("6 : View Transaction History");
                 WriteLine("7 : Revert a Transaction");
                 WriteLine("8 : Exit");
