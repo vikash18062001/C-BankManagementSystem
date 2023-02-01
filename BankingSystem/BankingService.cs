@@ -1,72 +1,94 @@
-﻿using System;
-using static System.Console;
+﻿using static System.Console;
+
 public class BankingService
 {
-    public BankDetailsOfEmployee create_account(string bankId)
+    public BankDetailsOfEmployee CreateAccount(string bankId)
     {
         BankDetailsOfEmployee bankDetailsOfEmployee = new BankDetailsOfEmployee();
+        int? initialBalance = 0;
         WriteLine("Enter the Name");
         string? name = ReadLine();
         WriteLine("Enter the dob");
         string? dob = ReadLine();
         WriteLine("Enter InitialBalance");
-        int? initialBalance = Convert.ToInt32(ReadLine());
+
+        try {
+            initialBalance = Convert.ToInt32(ReadLine());
+        } catch {
+            WriteLine("Enter Valid Amount ");
+            return null!;
+        };
+
         WriteLine("Enter the password You want for this account");
         string? password = ReadLine();
 
-        bankDetailsOfEmployee._name = name;
-        bankDetailsOfEmployee._dob = dob;
-        bankDetailsOfEmployee._initialBalance = initialBalance;
-        bankDetailsOfEmployee._curBalance = initialBalance;
-        bankDetailsOfEmployee._bankId = bankId;
-        bankDetailsOfEmployee._password = password;
-        bankDetailsOfEmployee.getAccountId(name!);
+        bankDetailsOfEmployee.Name = name;
+        bankDetailsOfEmployee.DOB = dob;
+        bankDetailsOfEmployee.InitialBalance = initialBalance;
+        bankDetailsOfEmployee.CurBalance = initialBalance;
+        bankDetailsOfEmployee.BankId = bankId;
+        bankDetailsOfEmployee.Password = password;
+        bankDetailsOfEmployee.GetAccountId(name!);
         return bankDetailsOfEmployee;
     }
 
     public void UpdateAccount(ref BankDetailsOfEmployee[] ob, string id)
     {
+        int flag = 0;
         foreach (BankDetailsOfEmployee obj in ob)
         {
-            if (obj?._accountId == id)
+            if (obj?.AccountId == id)
             {
-                if (obj?._accountId == null)
+                if (obj?.AccountId == null)
                     break;
+                flag = 1;
                 Console.WriteLine("Enter the new Name");
-                obj._name = ReadLine();
+                obj.Name = ReadLine();
                 WriteLine("Enter the new dob");
-                obj._dob = ReadLine();
+                obj.DOB = ReadLine();
             }
         }
-
+        if ( flag == 0 )
+        {
+            WriteLine("\nEnter a Valid Id My Brother\n");
+        }
+        
     }
 
     public void DeleteAccount(ref BankDetailsOfEmployee[] ob, string id)
     {
-        ob = Array.FindAll(ob, i => i?._accountId != id);
+        int flag = 0;
+        ob = Array.FindAll(ob, i => {
+            if (i?.AccountId == id)
+                flag = 1;
+            return i?.AccountId != id;
+        });
+        if (flag == 0)
+            WriteLine("\nEnter Valid id Please\n");
+        
     }
 
     public void ShowTransactionHistory(ref BankDetailsOfEmployee[] ob, string id, string bankId)
     {
+
         foreach (BankDetailsOfEmployee obj in ob)
         {
-            if (obj?._accountId == id && obj?._bankId == bankId)
+            if (obj?.AccountId == id && obj?.BankId == bankId)
             {
-                if (obj?._accountId == null)
-                    break;
-                WriteLine("TransactionId\t\tBankId\t\tAccountId\t\tAmount\t\t Action\t\t");
-                foreach (TransactionDetails transaction in obj._transaction)
+                WriteLine("TransactionId\t\t\t\tBankId\t\tAccountId\t\tAmount\t\tisFundTransfer\t\tAction\t\t");
+                foreach (Transaction transaction in obj.Transaction)
                 {
-                    if (transaction?._transId == null)
+                    if (transaction?.Id == null)
                         continue;
-                    if (transaction?._accountId == null)
+                    if (transaction?.AccountId == null)
                         break;
-                    string action = transaction._isCredit ? "Credit" : "Debit";
-                    WriteLine("{0}\t{1}\t\t{2}\t\t{3}\t\t{4}", transaction._transId, transaction._bankId, transaction._accountId, transaction._amount, action);
+                    string action = transaction.IsCredit ? "Credit" : "Debit";
+                    WriteLine("{0}\t{1}\t{2}\t\t{3}\t\t{4}\t\t{5}", transaction.Id, transaction.BankId, transaction.AccountId, transaction.Amount,transaction.IsFundTransfer,action);
                 }
-
+                return;
             }
         }
+        Console.WriteLine("Enter Valid ID ");
     }
 
     public void RevertTransaction(ref BankDetailsOfEmployee[] ob, string id, string bankId)
@@ -76,67 +98,73 @@ public class BankingService
 
         foreach (BankDetailsOfEmployee obj in ob)
         {
-            if (obj?._accountId == id && obj?._bankId == bankId)
+            if ((obj?.AccountId != null))
             {
-                if (obj?._accountId == null)
-                    break;
-                foreach (TransactionDetails transaction in obj._transaction)
+                foreach (Transaction transaction in obj.Transaction)
                 {
-                    if (transaction?._accountId == null)
-                        break;
-                    if (transaction?._transId == trans_id)
+                    if (transaction?.Id == trans_id)
                     {
-                        transaction!._transId = null;
-                        if (transaction._isCredit)
+                        transaction!.Id = null;
+                        if (transaction.IsCredit)
                         {
-                            obj._curBalance -= transaction._amount;
+                            obj.CurBalance -= transaction.Amount;
                         }
                         else
-                            obj._curBalance += transaction._amount;
+                            obj.CurBalance += transaction.Amount;
+                        return;
+
                     }
                 }
-
             }
         }
+        WriteLine("Please Enter Valid Transaction Id");
+        return;
     }
+
     public void ShowAll(ref BankDetailsOfEmployee[] ob, int cursize)
     {
-        if (ob[0]?._accountId != null)
+        if (ob[0]?.AccountId != null)
         {
             foreach (BankDetailsOfEmployee obj in ob)
             {
-                if (obj?._accountId == null)
+                if (obj?.AccountId == null)
                     break;
-                WriteLine(obj._accountId);
-                WriteLine(obj._name);
-                WriteLine(obj._dob);
-                WriteLine(obj._curBalance);
-
+                WriteLine(obj.AccountId);
+                WriteLine(obj.Name);
+                WriteLine(obj.DOB);
+                WriteLine(obj.CurBalance);
             }
         }
         return;
     }
 
-    public void ChangeService(string? bankId, BankCreation bankCreationObj, bool isSame)
+    public void ChangeService(string? bankId, ref CreatingBank bankCreationObj, bool isSame)
     {
-        int index = Array.IndexOf(bankCreationObj._bankIds, bankId);
+        //GlobalDataService GlobalDataService = bankCreationObj.GlobalService;
+        int index = Array.IndexOf(GlobalDataService.BankIds, bankId);
+        if (index == -1)
+        {
+            WriteLine("Enter Valid BankID");
+            return;
+        }
 
         if (isSame)
         {
             WriteLine("Enter serive charge for RTGS in percent ");
-            bankCreationObj._RTGSSame[index] = Convert.ToDouble(ReadLine());
+            GlobalDataService.RTGSSame[index] = Convert.ToDouble(ReadLine());
             WriteLine("Enter serive charge for IMPS in percent ");
-            bankCreationObj._IMPSSame[index] = Convert.ToDouble(ReadLine());
+            GlobalDataService.IMPSSame[index] = Convert.ToDouble(ReadLine());
         }
         else
         {
 
             WriteLine("Enter serive charge for RTGS in percent ");
-            bankCreationObj._RTGSDiff[index] = Convert.ToDouble(ReadLine());
+            GlobalDataService.RTGSDiff[index] = Convert.ToDouble(ReadLine());
             WriteLine("Enter serive charge for IMPS in percent ");
-            bankCreationObj._IMPSDiff[index] = Convert.ToDouble(ReadLine());
+            GlobalDataService.IMPSDiff[index] = Convert.ToDouble(ReadLine());
 
         }
+
     }
 
     //public void exchangeCurRate(ref BankCreation bankCreation , string bankId)
