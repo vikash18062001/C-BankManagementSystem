@@ -32,10 +32,10 @@ public class BankingService
         return bankDetailsOfEmployee;
     }
 
-    public void UpdateAccount(ref BankDetailsOfEmployee[] ob, string id)
+    public void UpdateAccount(string id)
     {
         int flag = 0;
-        foreach (BankDetailsOfEmployee obj in ob)
+        foreach (BankDetailsOfEmployee obj in GlobalDataService.currentBankEmployee)
         {
             if (obj?.AccountId == id)
             {
@@ -55,12 +55,20 @@ public class BankingService
         
     }
 
-    public void DeleteAccount(ref BankDetailsOfEmployee[] ob, string id)
+    public void DeleteAccount( string id)
     {
         int flag = 0;
-        ob = Array.FindAll(ob, i => {
+        GlobalDataService.currentBankEmployee = Array.FindAll(GlobalDataService.currentBankEmployee, i => {
             if (i?.AccountId == id)
                 flag = 1;
+            return i?.AccountId != id;
+        });
+        GlobalDataService.Transaction = Array.FindAll(GlobalDataService.Transaction, i => {
+            if (i?.AccountId == id)
+            {
+                flag = 1;
+                GlobalDataService.TotalTransaction--;
+            }
             return i?.AccountId != id;
         });
         if (flag == 0)
@@ -68,9 +76,9 @@ public class BankingService
         
     }
 
-    public void ShowTransactionHistory(ref BankDetailsOfEmployee[] ob, string id, string bankId)
+    public void ShowTransactionHistory( string id, string bankId)
     {
-        WriteLine("TransactionId\t\t\t\t\t\tBankId\t\tAccountId\t\tAmount\t\tisFundTransfer\t\tAction\t\t");
+        WriteLine("TransactionId\t\t\t\t\t\t\t\tBankId\t\tAccountId\t\tAmount\t\tisFundTransfer\t\tAction\t\t");
         int flag = 0;
         foreach (Transaction transaction in GlobalDataService.Transaction)
         {
@@ -89,7 +97,7 @@ public class BankingService
             Console.WriteLine("Enter valid ID ");
     }
 
-    public void RevertTransaction(ref BankDetailsOfEmployee[] ob, string accountId, string bankId)
+    public void RevertTransaction(string accountId, string bankId)
     { 
         WriteLine("Enter the transId you want to revert");
         string? transId = Utility.GetInputString();
@@ -134,11 +142,8 @@ public class BankingService
 
     public void ChangeService(string? bankId, bool isSame)
     {
-        //model model = bankCreationObj.GlobalService;
-        //int index = Array.IndexOf(model.BankIds, bankId);
         BankDetailModel model = Utility.GetBankDetails(bankId);
         if (model == null)
-
         {
             WriteLine("Enter valid bankID");
             return;
@@ -162,15 +167,4 @@ public class BankingService
         }
 
     }
-
-    //public void exchangeCurRate(ref BankCreation bankCreation , string bankId)
-    //{
-    //	WriteLine("Enter the currency In Short form i.e INR");
-    //	string? cur = Utility.GetInputString();
-    //	WriteLine("Enter the ExchangeRate to INR");
-    //	double? rate = Convert.ToDouble(Utility.GetInputString());
-    //	Dictionary<string, double> dict = new Dictionary<string, double>();
-    //	dict[cur] = rate;
-    //	bankCreation.exchangeRate[bankId].
-    //}
 }

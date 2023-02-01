@@ -14,16 +14,8 @@ public class AccountService
                 transaction.Amount = moneyToDeposit;
                 transaction.IsCredit = true;
                 transaction.IsFundTransfer = fundTransfer;
-                //if (fundTransfer)
-                //{
-                //    transaction.AccountId = accountId2;
-                //    transaction.BankId = bankId2;
-                //}
-                //else
-                //{
-                    transaction.AccountId = id;
-                    transaction.BankId = bankId;
-                //}
+                transaction.AccountId = id;
+                transaction.BankId = bankId;
                 transaction.Id = "TXN" + detail.BankId + id + DateTime.Now.ToOADate();
                 GlobalDataService.Transaction[GlobalDataService.TotalTransaction++] = transaction;
                 WriteLine("Successfully Deposited");
@@ -47,16 +39,8 @@ public class AccountService
                 WriteLine("Successful withdraw");
                 transaction.Amount = moneyToWithDraw;
                 transaction.IsFundTransfer = fundTransfer;
-                //if (fundTransfer)
-                //{
-                //    transaction.AccountId = accountId2;
-                //    transaction.BankId = bankId2;
-                //}
-                //else
-                //{
-                    transaction.AccountId = id;
-                    transaction.BankId = bankId;
-                //}
+                transaction.AccountId = id;
+                transaction.BankId = bankId;
                 transaction.IsCredit = false;
                 transaction.Id = "TXN" + detail.BankId + id + DateTime.Now.ToOADate();
                 GlobalDataService.Transaction[GlobalDataService.TotalTransaction++] = transaction;
@@ -108,7 +92,7 @@ public class AccountService
     public void ShowTransactionHistory(string id, string bankId)
     {
         BankingService bankingService = new BankingService();
-        bankingService.ShowTransactionHistory(ref GlobalDataService.currentBankEmployee, id, bankId);
+        bankingService.ShowTransactionHistory(id, bankId);
     }
 }
 

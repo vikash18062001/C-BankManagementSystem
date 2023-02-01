@@ -9,8 +9,7 @@ public class BankingStaffMenu
 
     public void HomePage()
     {
-        WriteLine("Note : AccountId is of format .First 3 letter of username + {0}\nBankdId is of format.First 3 letter of bankName {1}\n"
-                          , DateTime.Now.Date.ToOADate(), DateTime.Now.Date.ToOADate());
+        WriteLine("Note : AccountId is of format .First 3 letter of username + date format string \nBankdId is of format.First 3 letter of bankName + date format string \n");
         WriteLine("Enter the bankId");
         string? id = Utility.GetInputString();
         WriteLine("Enter the userName");
@@ -33,8 +32,7 @@ public class BankingStaffMenu
                 WriteLine("6 : View Transaction History");
                 WriteLine("7 : Revert a Transaction");
                 WriteLine("8 : Exit");
-                WriteLine("Note : AccountId is of format .First 3 letter of username + {0}\nBankdId is of format.First 3 letter of bankName {1}\n"
-                          , DateTime.Now.Date.ToOADate(), DateTime.Now.Date.ToOADate());
+                WriteLine("Note : AccountId is of format .First 3 letter of username + date format string  \n BankdId is of format.First 3 letter of bankName + date format  string \n ");
                 object? input = Utility.GetInputString();
                 string? inputString = input?.ToString();
                 switch (inputString)
@@ -48,12 +46,12 @@ public class BankingStaffMenu
                     case "2":
                         WriteLine("Enter Your accountId");
                         CurId = Utility.GetInputString();
-                        BankingService.UpdateAccount(ref GlobalDataService.currentBankEmployee, CurId!);
+                        BankingService.UpdateAccount(CurId!);
                         break;
                     case "3":
                         WriteLine("Enter the accountId you want to delete");
                         CurId = Utility.GetInputString();
-                        BankingService.DeleteAccount(ref GlobalDataService.currentBankEmployee, CurId!);
+                        BankingService.DeleteAccount(CurId!);
                         CurEmp--;
                         break;
                     case "4":
@@ -70,18 +68,17 @@ public class BankingStaffMenu
                     case "6":
                         WriteLine("Enter the accountId for which you want to get transaction history");
                         CurId = Utility.GetInputString();
-                        BankingService.ShowTransactionHistory(ref GlobalDataService.currentBankEmployee, CurId!, this.BankId!);
+                        BankingService.ShowTransactionHistory( CurId!, this.BankId!);
                         break;
                     case "7":
                         WriteLine("Enter the accountId for which you want to revert the transaction");
                         CurId = Utility.GetInputString();
-                        BankingService.RevertTransaction(ref GlobalDataService.currentBankEmployee, CurId!, this.BankId!);
+                        BankingService.RevertTransaction( CurId!, this.BankId!);
                         break;
                     case "8":
                         return;
                 }
                 ReadKey();
-
             }
         }
         else

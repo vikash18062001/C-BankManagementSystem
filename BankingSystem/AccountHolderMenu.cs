@@ -9,9 +9,8 @@ public class AccountHolderMenu
 
     public void HomePage()
     {
-        WriteLine(" Note : AccountId is of format .First 3 letter of username + " +
-                    "{0}\nBankdId is of format.First 3 letter of bankName {1} + \n",
-                    DateTime.Now.Date.ToOADate(), DateTime.Now.Date.ToOADate());
+        WriteLine(" Note : AccountId is of format .First 3 letter of username + date format string" +
+                    "\nBankdId is of format.First 3 letter of bankName + date format string \n");
         WriteLine("Enter the bankId");
         string? loginBankId = Utility.GetInputString();
         WriteLine("Enter the accountId");
