@@ -3,40 +3,46 @@
 public class CreatingBank
 {
 
-	//public GlobalDataService GlobalDataService = new GlobalDataService();
-
-
-    string? BankId;
+	string? BankId;
 	int CurCount = 0;
 	
 	public void CreateBank()
 	{
-		WriteLine("Enter the BankName At Least it Would Be of Three Letter");
-		string? bankName = ReadLine();
+		WriteLine("Enter the bankname at least it would be of three letter");
+		string? bankName = Utility.GetInputString();
+
 		if (bankName!.Length < 3)
 		{
-			WriteLine("Even After Telling Did not Entered Valid Name.Sir Please Enter a Valid Name");
+			WriteLine("Even after telling did not entered valid name.Sir please enter a valid name");
 			return;
 		}
-		this.BankId = bankName?.Substring(0, 3) + DateTime.Now.Date.ToOADate();
+
+		this.BankId = bankName?.Substring(0, 3) + DateTime.Now.ToOADate().ToString();
 		WriteLine("Enter bank creator name");
-		string? createrName = ReadLine();
-        WriteLine("Enter bank creator Password");
-        string? password = ReadLine();
+		string? createrName = Utility.GetInputString();
+		WriteLine("Enter bank creator password");
+		string? password = Utility.GetInputString();
 		WriteLine(this.BankId);
 
-        if (GlobalDataService.BankNames.Contains(bankName) && GlobalDataService.BankIds.Contains(BankId))
-			WriteLine("Bank Already Exist");
-		else if(bankName?.Length > 0)
+		foreach (BankDetailModel model in GlobalDataService.BankDetails)
 		{
-			GlobalDataService.BankIds[CurCount] = this.BankId;
-			GlobalDataService.BankNames[CurCount] = bankName;
-			GlobalDataService.BankCreaterName[CurCount] = createrName!;
-			GlobalDataService.Passwords[CurCount] = password!;
-			CurCount++;
-			WriteLine("Successfully Created A Bank");
-;		}
-	}		
-}
+			if (model?.BankId !=null && model.BankId == this.BankId && model.BankName == bankName)
+			{
+				WriteLine("Bank already exist");
+				return;
+			}
+		}
+
+		BankDetailModel detailModelObj = new BankDetailModel();
+		detailModelObj.BankId = this.BankId;
+		detailModelObj.BankName = bankName;
+		detailModelObj.BankCreaterName = createrName!;
+		detailModelObj.Password = password!;
+		GlobalDataService.BankDetails[CurCount] = detailModelObj;
+		CurCount++;
+		WriteLine("Successfully created a bank");
+	}
+}		
+
 
 

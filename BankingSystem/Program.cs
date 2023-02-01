@@ -4,6 +4,7 @@ public class Program
 {
     static void Main()
     {
+        Clear();
         BankingStaffMenu bankingStaffMenu = new BankingStaffMenu();
         AccountHolderMenu accountHolderMenu = new AccountHolderMenu();
         CreatingBank creatingBank = new CreatingBank();
@@ -12,12 +13,12 @@ public class Program
         {
             WriteLine("****Banking Management System****");
             WriteLine("\n\n");
-            WriteLine("Login Page");
+            WriteLine("Login page");
             WriteLine("1 : Create A Bank");
             WriteLine("2 : Login as Bank Staff");
             WriteLine("3 : Login as Account Holder");
             WriteLine("4 : Exit");
-            object? input = ReadLine();
+            object? input = Utility.GetInputString();
             string? inputString = input?.ToString();
 
             switch (inputString)
@@ -26,16 +27,16 @@ public class Program
                     creatingBank.CreateBank();
                     break;
                 case "2":
-                    bankingStaffMenu.HomePage(ref creatingBank);
+                    bankingStaffMenu.HomePage();
                     break;
                 case "3":
-                    accountHolderMenu.HomePage(ref creatingBank);
+                    accountHolderMenu.HomePage();
                     break;
                 case "4":
                     Environment.Exit(1);
                     break;
                 default:
-                    WriteLine("Please Enter a Valid Value");
+                    WriteLine("Please enter a valid value");
                     break;
             }
             ReadKey();

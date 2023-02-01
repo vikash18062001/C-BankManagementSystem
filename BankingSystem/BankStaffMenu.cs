@@ -2,30 +2,29 @@
 
 public class BankingStaffMenu
 {
-    public static BankDetailsOfEmployee[] currentBankEmployee = new BankDetailsOfEmployee[10];
     static int CurEmp = 0;
     BankingService BankingService = new BankingService();
     string? BankId;
     string? CurId;
 
-    public void HomePage(ref CreatingBank bankCreationObj)
+    public void HomePage()
     {
-        WriteLine("Note : AccountId is of format .First 3 letter of username + {0}\nBankdId is Of format.First 3 letter of bankName {1}\n"
+        WriteLine("Note : AccountId is of format .First 3 letter of username + {0}\nBankdId is of format.First 3 letter of bankName {1}\n"
                           , DateTime.Now.Date.ToOADate(), DateTime.Now.Date.ToOADate());
         WriteLine("Enter the bankId");
-        string? id = ReadLine();
+        string? id = Utility.GetInputString();
         WriteLine("Enter the userName");
-        string? userName = ReadLine();
+        string? userName = Utility.GetInputString();
         WriteLine("Enter the password");
-        string? password = ReadLine();
-        bool isValid = Validate(id!, userName!, password!, ref bankCreationObj);
+        string? password = Utility.GetInputString();
+        bool isValid = Validate(id!, userName!, password!);
         if (isValid)
         {
 
             while (true)
             {
                 WriteLine("\n\n****Banking Management System****\n\n");
-                WriteLine("Choose What You Want to do\n");
+                WriteLine("Choose what you want to do\n");
                 WriteLine("1 : Creation of Account");
                 WriteLine("2 : Update an Account");
                 WriteLine("3 : Delete An Account");
@@ -34,9 +33,9 @@ public class BankingStaffMenu
                 WriteLine("6 : View Transaction History");
                 WriteLine("7 : Revert a Transaction");
                 WriteLine("8 : Exit");
-                WriteLine("Note : AccountId is of format .First 3 letter of username + {0}\nBankdId is Of format.First 3 letter of bankName {1}\n"
+                WriteLine("Note : AccountId is of format .First 3 letter of username + {0}\nBankdId is of format.First 3 letter of bankName {1}\n"
                           , DateTime.Now.Date.ToOADate(), DateTime.Now.Date.ToOADate());
-                object? input = Console.ReadLine();
+                object? input = Utility.GetInputString();
                 string? inputString = input?.ToString();
                 switch (inputString)
                 {
@@ -44,39 +43,39 @@ public class BankingStaffMenu
                         BankDetailsOfEmployee detail = BankingService.CreateAccount(BankId!);
                         if (detail == null)
                             break;
-                        currentBankEmployee[CurEmp++] = detail;
+                        GlobalDataService.currentBankEmployee[CurEmp++] = detail;
                         break;
                     case "2":
-                        WriteLine("Enter Your AccountId");
-                        CurId = ReadLine();
-                        BankingService.UpdateAccount(ref currentBankEmployee, CurId!);
+                        WriteLine("Enter Your accountId");
+                        CurId = Utility.GetInputString();
+                        BankingService.UpdateAccount(ref GlobalDataService.currentBankEmployee, CurId!);
                         break;
                     case "3":
-                        WriteLine("Enter the AccountId You Want to delete");
-                        CurId = ReadLine();
-                        BankingService.DeleteAccount(ref currentBankEmployee, CurId!);
+                        WriteLine("Enter the accountId you want to delete");
+                        CurId = Utility.GetInputString();
+                        BankingService.DeleteAccount(ref GlobalDataService.currentBankEmployee, CurId!);
                         CurEmp--;
                         break;
                     case "4":
-                        BankingService.ShowAll(ref currentBankEmployee, CurEmp);
-                        WriteLine("Enter the BankId You want to change Service");
-                        CurId = ReadLine();
-                        BankingService.ChangeService(CurId, ref bankCreationObj, true);
+                        BankingService.ShowAll(ref GlobalDataService.currentBankEmployee, CurEmp);
+                        WriteLine("Enter the bankId you want to change service");
+                        CurId = Utility.GetInputString();
+                        BankingService.ChangeService(CurId, true);
                         break;
                     case "5":
-                        WriteLine("Enter the BankId You want to change Service");
-                        CurId = ReadLine();
-                        BankingService.ChangeService(CurId, ref bankCreationObj, false);
+                        WriteLine("Enter the bankId You want to change service");
+                        CurId = Utility.GetInputString();
+                        BankingService.ChangeService(CurId, false);
                         break;
                     case "6":
-                        WriteLine("Enter the AccountId for which you want to get transaction history");
-                        CurId = ReadLine();
-                        BankingService.ShowTransactionHistory(ref currentBankEmployee, CurId!, this.BankId!);
+                        WriteLine("Enter the accountId for which you want to get transaction history");
+                        CurId = Utility.GetInputString();
+                        BankingService.ShowTransactionHistory(ref GlobalDataService.currentBankEmployee, CurId!, this.BankId!);
                         break;
                     case "7":
-                        WriteLine("Enter the AccountId for which you want to revert the transaction");
-                        CurId = ReadLine();
-                        BankingService.RevertTransaction(ref currentBankEmployee, CurId!, this.BankId!);
+                        WriteLine("Enter the accountId for which you want to revert the transaction");
+                        CurId = Utility.GetInputString();
+                        BankingService.RevertTransaction(ref GlobalDataService.currentBankEmployee, CurId!, this.BankId!);
                         break;
                     case "8":
                         return;
@@ -87,17 +86,17 @@ public class BankingStaffMenu
         }
         else
         {
-            WriteLine("Enter Correct Details");
+            WriteLine("Enter correct details");
 
         }
         return;
     }
 
-    public bool Validate(string bankId, string userName, string password, ref CreatingBank bankCreationObj)
+    public bool Validate(string bankId, string userName, string password)
     {
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < 20; i++)
         {
-            if ((GlobalDataService.BankIds[i] != null) && (GlobalDataService.BankIds[i] == bankId) && (GlobalDataService.BankCreaterName[i] == userName) && (GlobalDataService.Passwords[i] == password))
+            if ((GlobalDataService.BankDetails[i]?.BankId != null) && (GlobalDataService.BankDetails[i].BankId == bankId) && (GlobalDataService.BankDetails[i].BankCreaterName == userName) && (GlobalDataService.BankDetails[i].Password == password))
             {
                 this.BankId = bankId;
                 return true;

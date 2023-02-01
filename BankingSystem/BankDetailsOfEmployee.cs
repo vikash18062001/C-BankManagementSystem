@@ -7,7 +7,6 @@
 	public string? BankId ;
 	public double? InitialBalance ;
 	public double? CurBalance;
-	public int TotalTransaction;
 
     public BankDetailsOfEmployee()
     {
@@ -18,14 +17,13 @@
 		this.BankId = String.Empty;
 		this.InitialBalance = 0;
 		this.CurBalance = 0;
-		this.TotalTransaction = 0;
     }
 
-	public Transaction[] Transaction = new Transaction[20]; 
+	
 
 	public void GetAccountId(string name)
 	{
-		this.AccountId = name.Substring(0, 3) + DateTime.Now.Date.ToOADate();
+		this.AccountId = name.Substring(0, 3) + DateTime.Now.ToOADate().ToString();
 		Console.WriteLine(this.AccountId);
 	}
 
