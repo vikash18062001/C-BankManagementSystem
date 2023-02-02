@@ -1,31 +1,37 @@
 ﻿<Properties StartupConfiguration="{4E0B0A95-F539-4A31-849C-C707AB3637D4}|Default">
-  <MultiItemStartupConfigurations />
-  <MonoDevelop.Ide.Workbench ActiveDocument="BankingSystem/Program.cs">
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="BankingSystem/BankDetailsOfEmployee.cs">
     <Files>
-      <File FileName="BankingSystem/BankStaffMenu.cs" Line="93" Column="169" />
-      <File FileName="BankingSystem/Program.cs" Line="3" Column="23" />
-      <File FileName="BankingSystem/AccountHolderMenu.cs" Line="23" Column="5" />
-      <File FileName="BankingSystem/AccountService.cs" Line="65" Column="65" />
-      <File FileName="BankingSystem/TransactionDetails.cs" Line="9" Column="9" />
-      <File FileName="BankingSystem/BankingService.cs" Line="137" Column="29" />
-      <File FileName="BankingSystem/BankCreation.cs" Line="38" Column="51" />
-      <File FileName="BankingSystem/BankDetailsOfEmployee.cs" Line="24" Column="59" />
-      <File FileName="BankingSystem/GlobalDataService.cs" Line="3" Column="2" />
+      <File FileName="BankingSystem/Program.cs" Line="46" Column="1" />
+      <File FileName="BankingSystem/AccountHolderMenu.cs" Line="92" Column="1" />
+      <File FileName="BankingSystem/AccountService.cs" Line="14" Column="53" />
+      <File FileName="BankingSystem/Transaction.cs" Line="8" Column="9" />
+      <File FileName="BankingSystem/BankingService.cs" Line="171" Column="1" />
+      <File FileName="BankingSystem/BankDetailsOfEmployee.cs" Line="19" Column="23" />
+      <File FileName="BankingSystem/GlobalDataService.cs" Line="10" Column="1" />
+      <File FileName="BankingSystem/Utility.cs" Line="19" Column="61" />
+      <File FileName="BankingSystem/BankDetailModel.cs" Line="1" Column="1" />
+      <File FileName="BankingSystem/BankStaffMenu.cs" Line="1" Column="1" />
+      <File FileName="BankingSystem/CreatingBank.cs" Line="1" Column="1" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">
         <State name="__root__">
           <Node name="BankingSystem" expanded="True">
-            <Node name="BankingSystem" expanded="True" />
+            <Node name="BankingSystem" expanded="True">
+              <Node name="BankDetailsOfEmployee.cs" selected="True" />
+            </Node>
           </Node>
         </State>
       </Pad>
     </Pads>
   </MonoDevelop.Ide.Workbench>
-  <MonoDevelop.Ide.DebuggingService.Breakpoints>
-    <BreakpointStore />
-  </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MonoDevelop.Ide.ItemProperties.BankingSystem PreferredExecutionTarget="MonoDevelop.Default" />
-  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore>
+      <Breakpoint file="/Users/vikash/Projects/BankingSystem/BankingSystem/AccountService.cs" relfile="BankingSystem/AccountService.cs" line="80" column="1" />
+    </BreakpointStore>
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MultiItemStartupConfigurations />
 </Properties>

@@ -3,61 +3,64 @@
 public class AccountService 
 {
 
-    public void DepositMoney(string id, string bankId, string accountId2, string bankId2, double? moneyToDeposit, bool fundTransfer)
+    public bool DepositMoney(string id, string bankId, double moneyToDeposit,string? senderName)
     {
         Transaction transaction = new Transaction();
-        foreach (BankDetailsOfEmployee detail in GlobalDataService.currentBankEmployee)
+        foreach (AccountHolder detail in GlobalDataService.AccountHolder)
         {
-            if (detail?.AccountId == id && detail?.BankId == bankId)
+            if (detail?.Id == id && detail?.BankId == bankId)
             {
-                detail.CurBalance += moneyToDeposit;
+                detail.Balance += moneyToDeposit;
                 transaction.Amount = moneyToDeposit;
-                transaction.IsCredit = true;
-                transaction.IsFundTransfer = fundTransfer;
+                transaction.Type = true;
                 transaction.AccountId = id;
                 transaction.BankId = bankId;
+                transaction.CreatedOn = DateTime.Now;
+                transaction.CreatedBy = senderName??detail.Name;
                 transaction.Id = "TXN" + detail.BankId + id + DateTime.Now.ToOADate();
-                GlobalDataService.Transaction[GlobalDataService.TotalTransaction++] = transaction;
+                GlobalDataService.Transactions.Add(transaction);
                 WriteLine("Successfully Deposited");
-                break;
-            }
-        }
-    }
-
-    public bool WithDrawMoney(string id, string bankId, string accountId2, string bankId2, double? moneyToWithDraw, bool fundTransfer) // account id
-    {
-        Transaction transaction = new Transaction();
-        foreach (BankDetailsOfEmployee detail in GlobalDataService.currentBankEmployee)
-        {
-            if (detail?.AccountId == id && detail?.BankId == bankId)
-            {
-                if (detail.CurBalance < moneyToWithDraw)
-                {
-                    WriteLine("Not enough money . Cur balance:{0}", detail.CurBalance);
-                    return false;
-                }
-                WriteLine("Successful withdraw");
-                transaction.Amount = moneyToWithDraw;
-                transaction.IsFundTransfer = fundTransfer;
-                transaction.AccountId = id;
-                transaction.BankId = bankId;
-                transaction.IsCredit = false;
-                transaction.Id = "TXN" + detail.BankId + id + DateTime.Now.ToOADate();
-                GlobalDataService.Transaction[GlobalDataService.TotalTransaction++] = transaction;
-                detail.CurBalance -= moneyToWithDraw;
                 return true;
             }
         }
         return false;
     }
 
-    public void TransferFund(string bankId1, string bankId2, string accountId1, string accountId2, double? amount)
+    public bool WithDrawMoney(string id, string bankId, double moneyToWithDraw , string? senderName) // account id
+    {
+        Transaction transaction = new Transaction();
+        foreach (AccountHolder detail in GlobalDataService.AccountHolder)
+        {
+            if (detail?.Id == id && detail?.BankId == bankId)
+            {
+                if (detail.Balance < moneyToWithDraw)
+                {
+                    WriteLine("Not enough money . Cur balance:{0}", detail.Balance);
+                    return false;
+                }
+                transaction.Amount = moneyToWithDraw;
+                transaction.AccountId = id;
+                transaction.BankId = bankId;
+                transaction.Type = false;
+                transaction.CreatedOn = DateTime.Now;
+                transaction.CreatedBy = senderName??detail.Name ;
+                transaction.Id = "TXN" + detail.BankId + id + DateTime.Now.ToOADate();
+                GlobalDataService.Transactions.Add(transaction);
+                detail.Balance -= moneyToWithDraw;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void TransferFund(string bankId1, string bankId2, string accountId1, string accountId2, double amount)
     {
         WriteLine("Which mode is this 1:RTGS , 2 : IMPS");
         int mode = Convert.ToInt32(Utility.GetInputString()); ;
-        double? newAmount = amount;
+        double newAmount = amount;
 
-        BankDetailModel model = Utility.GetBankDetails(bankId1);
+        Bank model = Utility.GetBankDetails(bankId1);
+       
 
 
         if (bankId1.Substring(0, 3) == bankId2.Substring(0, 3))
@@ -83,8 +86,13 @@ public class AccountService
             }
         }
 
-        if (WithDrawMoney(accountId1, bankId1, accountId2, bankId2, newAmount, true))
-            DepositMoney(accountId2, bankId2, accountId1, bankId1, amount, true);
+        if (Utility.checkIfValidIdsOrNot(bankId1, accountId1) && Utility.checkIfValidIdsOrNot(bankId2, accountId2))
+        {
+            AccountHolder accountHolder1 = Utility.GetDetails(accountId1, bankId1);
+            if (WithDrawMoney(accountId1,bankId1, newAmount,accountHolder1.Name))
+                DepositMoney( accountId2,bankId2, amount,accountHolder1.Name);
+            
+        }
         else
             WriteLine("Transaction failed");
     }
@@ -95,5 +103,3 @@ public class AccountService
         bankingService.ShowTransactionHistory(id, bankId);
     }
 }
-
-

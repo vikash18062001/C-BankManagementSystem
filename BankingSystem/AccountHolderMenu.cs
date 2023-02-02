@@ -9,8 +9,6 @@ public class AccountHolderMenu
 
     public void HomePage()
     {
-        WriteLine(" Note : AccountId is of format .First 3 letter of username + date format string" +
-                    "\nBankdId is of format.First 3 letter of bankName + date format string \n");
         WriteLine("Enter the bankId");
         string? loginBankId = Utility.GetInputString();
         WriteLine("Enter the accountId");
@@ -54,31 +52,55 @@ public class AccountHolderMenu
                 case "1":
                     WriteLine("Enter the accountId ");
                     id = Utility.GetInputString();
+                    if (Utility.isNull(id))
+                        break;
                     WriteLine("Enter amount to deposit");
                     try { money = Convert.ToDouble(Utility.GetInputString()); } catch { WriteLine("Enter Valid Amount"); break; };
-                    accountService.DepositMoney(id!, this.BankId!, String.Empty, String.Empty, money, false);
+                    if (!accountService.DepositMoney(id!, this.BankId!, money,null))
+                        WriteLine("Enter valid credentials");
                     break;
+
                 case "2":
                     WriteLine("Enter the accountId");
                     id = Utility.GetInputString();
+                    if (Utility.isNull(id))
+                        break;
+
                     WriteLine("Enter amount to withDraw");
                     try { money = Convert.ToDouble(Utility.GetInputString()); } catch { WriteLine("Enter Valid Amount"); break; };
-                    accountService.WithDrawMoney(id!, this.BankId!, String.Empty, String.Empty, money, false);
+                    if (accountService.WithDrawMoney(id!, this.BankId!, money,null))
+                        WriteLine("Successful withdraw");
+                    else
+                        WriteLine("Withdraw unsucessful either check the balance or check the credentials");
                     break;
+
                 case "3":
                     WriteLine("Enter bankId to which you want to transfer");
                     string? bankId = Utility.GetInputString();
+                    if (Utility.isNull(bankId))
+                        break;
+
                     WriteLine("Enter accountId of the user you want to transfer money");
                     string? accountId = Utility.GetInputString();
+                    if (Utility.isNull(accountId))
+                        break;
+
                     WriteLine("Enter amount you want to transfer");
                     try { money = Convert.ToDouble(Utility.GetInputString()); } catch { WriteLine("Enter Valid Amount"); break; };
-                    accountService.TransferFund(this.BankId!, bankId!, this.AccountId!, accountId!, money);
+
+                    if (Utility.checkIfValidIdsOrNot(this.BankId!, this.AccountId) && Utility.checkIfValidIdsOrNot(bankId, accountId))
+                        accountService.TransferFund(this.BankId!, bankId!, this.AccountId!, accountId!, money);
+                    else
+                        WriteLine("Enter valid ids");
                     break;
+
                 case "4":
                     accountService.ShowTransactionHistory(this.AccountId!, this.BankId!);
                     break;
+
                 case "5":
                     return;
+
                 default:
                     WriteLine("Please enter a valid input");
                     break;
@@ -88,10 +110,10 @@ public class AccountHolderMenu
 
     public bool Validate(string bankId, string accountId, string password)
     {
-        WriteLine(GlobalDataService.currentBankEmployee);
-        foreach (BankDetailsOfEmployee detail in GlobalDataService.currentBankEmployee)
+        WriteLine(GlobalDataService.AccountHolder);
+        foreach (AccountHolder detail in GlobalDataService.AccountHolder)
         {
-            if (detail != null && detail.BankId == bankId && detail.AccountId == accountId && detail.Password == password)
+            if (detail != null && detail.BankId == bankId && detail.Id == accountId && detail.Password == password)
             {
                 this.BankId = bankId;
                 this.AccountId = accountId;
