@@ -4,9 +4,6 @@ public partial class Program
 {
     static void Main()
     {
-        HomePage.HomePageLogin();
+        new BankApplication().Initialize();
     }
 }
-
-
-

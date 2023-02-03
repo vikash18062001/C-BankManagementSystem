@@ -1,0 +1,23 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/BankingSystem/obj/Debug/net7.0/apphost.exe
+/BankingSystem/bin/Debug/net7.0/BankingSystem.exe
+/BankingSystem/bin/Debug/net7.0
+/BankingSystem
+/.vs/ProjectEvaluation/bankingsystem.projects.v5.2
+/.vs/ProjectEvaluation/bankingsystem.metadata.v5.2
+/.vs/ProjectEvaluation
+/.vs/BankingSystem/v17/.suo
+/.vs/BankingSystem/v17/.futdcache.v2
+/.vs/BankingSystem/v17
+/.vs/BankingSystem/FileContentIndex/read.lock
+/.vs/BankingSystem/FileContentIndex/962b3755-820c-4281-a912-55ba62d80b36.vsidx
+/.vs/BankingSystem/FileContentIndex/76625df7-1f52-4cb6-9b0b-5eedf9e5918d.vsidx
+/.vs/BankingSystem/FileContentIndex/30b5c377-1794-45da-8d63-59dc83d130ce.vsidx
+/.vs/BankingSystem/FileContentIndex/022116b1-dea7-48e9-8f92-19e77cc14552.vsidx
+/.vs/BankingSystem/FileContentIndex
+/.vs/BankingSystem/DesignTimeBuild/.dtbcache.v2
+/.vs/BankingSystem/DesignTimeBuild
+/.vs/BankingSystem

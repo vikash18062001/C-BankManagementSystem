@@ -2,7 +2,25 @@
 
 public class BankingService
 {
-    public AccountHolder CreateAccount(Dictionary<string,object> details)
+    public Bank CreateBank(Bank bank)
+    {
+        try
+        {
+            bank.Id = Utility.GenerateBankID(bank.Name);
+            if (!string.IsNullOrEmpty(bank.Id) && !string.IsNullOrEmpty(bank.Name) && !string.IsNullOrEmpty(bank.CreaterName))
+            {
+                GlobalDataService.Bank.Add(bank);
+            }
+        }
+        catch (Exception ex)
+        {
+            //logger
+        }
+
+        return bank;
+    }
+
+    public AccountHolder CreateAccount(Dictionary<string, object> details)
     {
         AccountHolder accountHolder = new AccountHolder();
 
@@ -18,7 +36,7 @@ public class BankingService
         return accountHolder;
     }
 
-    public bool UpdateAccount(string id , Dictionary<string,object> newDetail)
+    public bool UpdateAccount(string id, Dictionary<string, object> newDetail)
     {
         int flag = 0;
         foreach (AccountHolder obj in GlobalDataService.AccountHolder)
@@ -32,18 +50,19 @@ public class BankingService
                 obj.Mobile = newDetail["Mobile"].ToString()!;
             }
         }
-        if ( flag == 0 )
+        if (flag == 0)
         {
             return false;
         }
         return true;
-        
+
     }
 
     public bool DeleteAccount(string id)
     {
         int flag = 0;
-        GlobalDataService.AccountHolder.RemoveAll(r => {
+        GlobalDataService.AccountHolder.RemoveAll(r =>
+        {
             if (r.Id == id)
             {
                 flag = 1;
@@ -55,21 +74,21 @@ public class BankingService
             return false;
         DeleteTransactinon(id);
         return true;
-        
+
     }
 
-    public void ShowTransactionHistory( string id, string bankId)
+    public void ShowTransactionHistory(string id, string bankId)
     {
         WriteLine("\t\tTransactionId\t\t\t\t\t\tBankId\t\t\tAccountId\tCreatedBy\t\tCreatedOn\t\tAmount\t\tAction\t\t");
         int flag = 0;
         foreach (Transaction transaction in GlobalDataService.Transactions)
         {
             flag = 1;
-            if(transaction?.AccountId == id && transaction?.BankId == bankId)
+            if (transaction?.AccountId == id && transaction?.BankId == bankId)
             {
                 flag = 2;
                 string action = transaction.Type ? "Credit" : "Debit";
-                WriteLine("{0}\t{1}\t{2}\t\t{3}\t\t{4}\t\t{5}\t\t{6}", transaction.Id, transaction.BankId, transaction.AccountId, transaction.CreatedBy,transaction.CreatedOn,transaction.Amount,action);
+                WriteLine("{0}\t{1}\t{2}\t\t{3}\t\t{4}\t\t{5}\t\t{6}", transaction.Id, transaction.BankId, transaction.AccountId, transaction.CreatedBy, transaction.CreatedOn, transaction.Amount, action);
             }
         }
         if (flag == 0)
@@ -79,17 +98,17 @@ public class BankingService
     }
 
     public void RevertTransaction(string accountId, string bankId)
-    { 
+    {
         WriteLine("Enter the transId you want to revert");
         string? transId = Utility.GetInputString();
         if (transId == null)
             return;
-        foreach(Transaction transaction in GlobalDataService.Transactions)
+        foreach (Transaction transaction in GlobalDataService.Transactions)
         {
-            if(transaction?.AccountId == accountId && transaction?.BankId == bankId)
+            if (transaction?.AccountId == accountId && transaction?.BankId == bankId)
             {
                 if (transaction?.Id == transId)
-                { 
+                {
                     AccountHolder detail = Utility.GetDetails(accountId, bankId);
                     if (transaction.Type)
                     {
@@ -108,7 +127,7 @@ public class BankingService
 
     public void DeleteTransactinon(string? accountId)
     {
-        GlobalDataService.Transactions.RemoveAll(r=>(r.AccountId == accountId));
+        GlobalDataService.Transactions.RemoveAll(r => (r.AccountId == accountId));
     }
 
     public void ShowAll(List<AccountHolder> ob, int cursize)
@@ -127,5 +146,9 @@ public class BankingService
         }
         return;
     }
-  
+
+    public bool IsBankExist(string bankName)
+    {
+
+    }
 }

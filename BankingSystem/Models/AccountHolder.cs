@@ -9,6 +9,7 @@
 
 	public string BankId { get; set; }
 
+	public string AccountHolderID { get; set; }
 }
 
 
