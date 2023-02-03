@@ -4,22 +4,20 @@ using static System.Console;
 public class AccountHolderMenu 
 {
 
-    string? BankId;
-    string? AccountId;
+    AccountService AccountService = new AccountService();
 
     public void HomePage()
     {
-        WriteLine("Enter the bankId");
-        string? loginBankId = Utility.GetInputString();
-        WriteLine("Enter the accountId");
-        string? loginAccountId = Utility.GetInputString();
-        WriteLine("Enter the password");
-        string? password = Utility.GetInputString();
+        string? loginBankId = Utility.GetInputString("Enter the bankId",true);
 
-        bool isValid = Validate(loginBankId!, loginAccountId!, password!);
-        if (isValid)
+        string? loginAccountId = Utility.GetInputString("Enter the accountid",true);
+
+        string? password = Utility.GetInputString("Enter the password ",true);
+
+        AccountHolder accountDetail = AccountService.ValidateAccountDetails(loginBankId!, loginAccountId!, password!);
+        if (accountDetail != null)
         {
-            Menu();
+            Menu(accountDetail);
         }
         else
         {
@@ -28,77 +26,48 @@ public class AccountHolderMenu
         }
     }
 
-    public void Menu()
+    public void Menu(AccountHolder accountDetail)
     {
         AccountService accountService = new AccountService();
         while (true)
         {
 
             WriteLine("\n\n*****Account Holder Menu****\n\n");
-            WriteLine("Choose what you want to do\n");
-            WriteLine("1 : Deposit amount");
-            WriteLine("2 : WithDraw amount");
-            WriteLine("3 : Transfer funds");
-            WriteLine("4 : Get transaction history");
-            WriteLine("5 : Exit ");
+            WriteLine("1 : Deposit amount\n2 : WithDraw amount\n3 : Transfer funds\n4 : Get transaction history\n5 : Return to previous menu");
 
-            object? input = Utility.GetInputString();
-            string? inputString = input?.ToString();
+            int input = Utility.GetIntInput("Choose what you want to do",true);
             string? id;
             double money;
 
-            switch (inputString)
+            switch (input)
             {
-                case "1":
-                    WriteLine("Enter the accountId ");
-                    id = Utility.GetInputString();
-                    if (Utility.isNull(id))
-                        break;
-                    WriteLine("Enter amount to deposit");
-                    try { money = Convert.ToDouble(Utility.GetInputString()); } catch { WriteLine("Enter Valid Amount"); break; };
-                    if (!accountService.DepositMoney(id!, this.BankId!, money,null))
-                        WriteLine("Enter valid credentials");
+                case 1:
+                    id = Utility.GetInputString("Enter the accountid",true);
+                    money = Utility.GetDoubleAmount("Enter the amount to deposit");
+                    DepositMoney(id, accountDetail.BankId, money);
                     break;
 
-                case "2":
-                    WriteLine("Enter the accountId");
-                    id = Utility.GetInputString();
-                    if (Utility.isNull(id))
-                        break;
-
-                    WriteLine("Enter amount to withDraw");
-                    try { money = Convert.ToDouble(Utility.GetInputString()); } catch { WriteLine("Enter Valid Amount"); break; };
-                    if (accountService.WithDrawMoney(id!, this.BankId!, money,null))
-                        WriteLine("Successful withdraw");
-                    else
-                        WriteLine("Withdraw unsucessful either check the balance or check the credentials");
+                case 2:
+                    id = Utility.GetInputString("Enter the accountid",true);
+                    money = Utility.GetDoubleAmount("Enter the amount to withdraw");
+                    WithdrawMoney(id, accountDetail.BankId, money);
                     break;
 
-                case "3":
-                    WriteLine("Enter bankId to which you want to transfer");
-                    string? bankId = Utility.GetInputString();
-                    if (Utility.isNull(bankId))
-                        break;
-
-                    WriteLine("Enter accountId of the user you want to transfer money");
-                    string? accountId = Utility.GetInputString();
-                    if (Utility.isNull(accountId))
-                        break;
-
-                    WriteLine("Enter amount you want to transfer");
-                    try { money = Convert.ToDouble(Utility.GetInputString()); } catch { WriteLine("Enter Valid Amount"); break; };
-
-                    if (Utility.checkIfValidIdsOrNot(this.BankId!, this.AccountId) && Utility.checkIfValidIdsOrNot(bankId, accountId))
-                        accountService.TransferFund(this.BankId!, bankId!, this.AccountId!, accountId!, money);
+                case 3:
+                    string bankId = Utility.GetInputString("Enter the bankid to which you want to transfer",true);
+                    string accountId = Utility.GetInputString("Enter accountId of the user you want to transfer money",true);
+                    money = Utility.GetDoubleAmount("Enter amount you want to transfer");
+                    if (Utility.checkIfValidIdsOrNot(accountDetail.BankId, accountDetail.Id) && Utility.checkIfValidIdsOrNot(bankId, accountId))
+                        accountService.TransferFund(accountDetail.BankId, bankId, accountDetail.Id, accountId, money);
                     else
                         WriteLine("Enter valid ids");
                     break;
 
-                case "4":
-                    accountService.ShowTransactionHistory(this.AccountId!, this.BankId!);
+                case 4:
+                    accountService.ShowTransactionHistory(accountDetail.Id!, accountDetail.BankId!);
                     break;
 
-                case "5":
+                case 5:
                     return;
 
                 default:
@@ -107,19 +76,41 @@ public class AccountHolderMenu
             }
         }
     }
-
-    public bool Validate(string bankId, string accountId, string password)
+    public void DepositMoney(string  id , string bankId, double amount)
     {
-        WriteLine(GlobalDataService.AccountHolder);
-        foreach (AccountHolder detail in GlobalDataService.AccountHolder)
-        {
-            if (detail != null && detail.BankId == bankId && detail.Id == accountId && detail.Password == password)
-            {
-                this.BankId = bankId;
-                this.AccountId = accountId;
-                return true;
-            }
-        }
-        return false;
+        Dictionary<string, object> credential = new Dictionary<string, object>();
+        credential.Add("AccountId2", id);
+        credential.Add("BankId2", bankId);
+        credential.Add("Amount", amount);
+        credential.Add("IsFundTransfer", false);
+        credential.Add("Name", null);
+
+        if(!AccountService.DepositMoney(credential))
+            WriteLine("Enter valid credentials");
+        else
+            WriteLine("Successfully Deposited");
+
+
     }
+
+    public void WithdrawMoney(string id, string bankId, double amount)
+    {
+        Dictionary<string, object> credential = new Dictionary<string, object>();
+        credential.Add("AccountId", id);
+        credential.Add("BankId", bankId);
+        credential.Add("Amount", amount);
+        credential.Add("IsFundTransfer", false);
+        credential.Add("Name", null);
+
+        if (AccountService.WithDrawMoney(credential))
+            WriteLine("Successful withdraw");
+        else
+            WriteLine("Withdraw unsucessful either check the balance or check the credentials");
+       
+
+
+    }
+
+
 }
+

@@ -1,6 +1,6 @@
 ﻿using static System.Console;
 
-public class HomePage
+public class BankApplication
 {
     BankingService BankingService = new BankingService();
     public void Initialize()

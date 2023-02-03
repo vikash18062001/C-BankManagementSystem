@@ -2,130 +2,90 @@
 
 public class BankingStaffMenu
 {
-    static int CurEmp = 0;
+
     BankingService BankingService = new BankingService();
-    string BankId { get; set; }
+
     string CurId { get; set; }
 
     public BankingStaffMenu()
     {
-        this.BankId = string.Empty;
         this.CurId = string.Empty;
     }
 
     public void HomePage()
-    {
-        WriteLine("Enter the bankId");
-        string? id = Utility.GetInputString();
-        if(Utility.isNull(id))
-        {
-            Message();
-            return;
-        }
-        this.BankId = id!;
+    { 
+        
+        string id = Utility.GetInputString("Enter the BankId",true);
+       
+        string userName = Utility.GetInputString("Enter the username",true);
 
-        WriteLine("Enter the userName");
-        string? userName = Utility.GetInputString();
-        if (Utility.isNull(userName))
-        {
-            Message();
-            return;
-        }
+        string password = Utility.GetInputString("Enter the password",true);
+      
+        Bank bank = BankingService.Validate(id!, userName!, password!);
 
-        WriteLine("Enter the password");
-        string? password = Utility.GetInputString();
-        if (Utility.isNull(password))
-        {
-            Message();
-            return;
-        }
-
-        bool isValid = Validate(id!, userName!, password!);
-        if (isValid)
+        if (bank != null)
         {
             while (true)
             {
                 WriteLine("\n\n****Banking Management System****\n\n");
-                WriteLine("Choose what you want to do\n");
-                WriteLine("1 : Creation of Account");
-                WriteLine("2 : Update an Account");
-                WriteLine("3 : Delete An Account");
-                WriteLine("4 : Add Service Charge For Same Bank");
-                WriteLine("5 : Add Service Charge For Different Bank");
-                WriteLine("6 : View Transaction History");
-                WriteLine("7 : Revert a Transaction");
-                WriteLine("8 : Return to previous menu");
+                WriteLine("1 : Creation of Account\n2 : Update an Account\n3 : Delete An Account\n4 : Add Service Charge For Same Bank\n5 : Add Service Charge For Different Bank\n6 : View Transaction History\n7 : Revert a Transaction\n8 : Return to previous menu");
                 
-                string? input = Utility.GetInputString();
-                if(Utility.isNull(input))
+                int input = Utility.GetIntInput("Choose what you want to do",true);
+
+                switch (input)
                 {
-                    Message();
-                    return;
-                }
-                string? inputString = input?.ToString();
-                switch (inputString)
-                {
-                    case "1":
-                        Dictionary<string,object> detail = getInput() ;
+                    case 1:
+                        Dictionary<string,object> detail = getInput(bank) ;
                         if (detail == null)
                             break;
-                        AccountHolder accountHolder = BankingService.CreateAccount(detail);
-                        GlobalDataService.AccountHolder.Add(accountHolder); 
+                        Utility.Message((BankingService.CreateAccount(detail)), "created");
                         break;
 
-                    case "2":
-                        WriteLine("Enter Your accountId");
-                        CurId = Utility.GetInputString()!;
+                    case 2:
+                        CurId = Utility.GetInputString("Enter your accountId",true);
                         if (CurId == null)
                             break;
                         Dictionary<string,object> newDetail = UpdateAccount();
-                        if (!BankingService.UpdateAccount(CurId!, newDetail))
-                            break;
+                        Utility.Message(BankingService.UpdateAccount(CurId, newDetail),"updated");
                         break;
 
-                    case "3":
-                        WriteLine("Enter the accountId you want to delete");
-                        CurId = Utility.GetInputString()!;
+                    case 3:
+                        CurId = Utility.GetInputString("Enter the accountId you want to delete",true);
                         if (CurId == null)
                             break;
-                        if(!BankingService.DeleteAccount(CurId!))
-                            WriteLine("\nEnter valid id please\n");
+                        Utility.Message(BankingService.DeleteAccount(CurId),"deleted");
                         break;
 
-                    case "4":
-                        BankingService.ShowAll(GlobalDataService.AccountHolder, CurEmp);
-                        WriteLine("Enter the bankId you want to change service");
-                        CurId = Utility.GetInputString()!;
+                    case 4:
+                        //BankingService.ShowAll(GlobalDataService.AccountHolder, CurEmp);
+                        CurId = Utility.GetInputString("Enter the bankId you want to change service",true);
                         if (CurId == null)
                             break;
                         ChangeServiceRate(CurId, true);
                         break;
 
-                    case "5":
-                        WriteLine("Enter the bankId You want to change service");
-                        CurId = Utility.GetInputString()!;
+                    case 5:
+                        CurId = Utility.GetInputString("Enter the bankId You want to change service",true);
                         if (CurId == null)
                             break;
                         ChangeServiceRate(CurId, false);
                         break;
 
-                    case "6":
-                        WriteLine("Enter the accountId for which you want to get transaction history");
-                        CurId = Utility.GetInputString()!;
+                    case 6:
+                        CurId = Utility.GetInputString("Enter the accountId for which you want to get transaction history",true)!;
                         if (CurId == null)
                             break;
-                        BankingService.ShowTransactionHistory( CurId!, this.BankId!);
+                        BankingService.ShowTransactionHistory( CurId, bank.Id);
                         break;
 
-                    case "7":
-                        WriteLine("Enter the accountId for which you want to revert the transaction");
-                        CurId = Utility.GetInputString()!;
+                    case 7:
+                        CurId = Utility.GetInputString("Enter the accountId for which you want to revert the transaction",true)!;
                         if (CurId == null)
                             break;
-                        BankingService.RevertTransaction( CurId!, this.BankId!);
+                        BankingService.RevertTransaction( CurId, bank.Id);
                         break;
 
-                    case "8":
+                    case 8:
                         return;
                 }
             }
@@ -138,75 +98,26 @@ public class BankingStaffMenu
         return;
     }
 
-    public bool Validate(string bankId, string userName, string password)
-    {
-        int size = GlobalDataService.Bank.Count();
-        for (int i = 0; i < size; i++)
-        {
-            if ((GlobalDataService.Bank[i]?.Id != null) && (GlobalDataService.Bank[i].Id == bankId) && (GlobalDataService.Bank[i].CreaterName == userName) && (GlobalDataService.Bank[i].Password == password))
-            {
-                this.BankId = bankId;
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public void Message()
-    {
-        WriteLine( "Value cannot be Empty.Please Enter valid Value");
-    }
-
-    public Dictionary<string,object> getInput()
+    public Dictionary<string,object> getInput(Bank bank)
     {
         Dictionary<string, object> inputData = new Dictionary<string, object>();
+
+        string name;
     
-        WriteLine("Enter the name");
-        string? name = Utility.GetInputString();
-        if (Utility.isNull(name))
-        {
-            Message();
-            return null!;
-        }
-        if (name?.Length < 3)
-        {
-            WriteLine("Please enter valid name");
-            return null!;
-        }
-        WriteLine("Enter the mobileno");
-        string? mobile = Utility.GetInputString();
-        if (Utility.isNull(mobile))
-        {
-            Message();
-            return null!;
-        }
+        inputData.Add("Name",name = Utility.GetInputString("Enter the name", true));
 
-        WriteLine("Enter Email");
-        string? email = Utility.GetInputString();
-        if(Utility.isNull(email))
-        {
-            Message();
-            return null!;
-        }
+        inputData.Add("Email", Utility.GetInputString("Enter email", true));
 
-        WriteLine("Enter the password You want for this account");
-        string? password = Utility.GetInputString();
-        if (Utility.isNull(email))
-        {
-            Message();
-            return null!;
-        }
+        inputData.Add("Mobile", Utility.GetInputString("Enter the mobileno", true));
 
+        inputData.Add("Password", Utility.GetPassword("Enter password", true));
 
-        string? accountId = Utility.GetAccountId(name!);
-    
-        inputData.Add("Name",name!);
-        inputData.Add("Email", email!);
-        inputData.Add("Mobile", mobile!);
-        inputData.Add("Password", password!);
         inputData.Add("Type", "AccountHolder");
-        inputData.Add("Id", accountId);
-        inputData.Add("BankId", this.BankId);
+
+        inputData.Add("Id", Utility.GetAccountId(name!));
+
+        inputData.Add("BankId", bank.Id);
+
         inputData.Add("Balance", 0);
 
         return inputData;
@@ -214,38 +125,23 @@ public class BankingStaffMenu
 
     public Dictionary<string, object> UpdateAccount()
     {
-        string? mobile=null, email=null;
+
         Dictionary<string, object> inputData = new Dictionary<string, object>();
 
-        if (UpdateMessage("mobileno"))
-        {
-            WriteLine("Enter the mobileno");
-            mobile = Utility.GetInputString();
-            if (Utility.isNull(mobile))
-            {
-                Message();
-                return null!;
-            }
-        }
-
-        if (UpdateMessage("email"))
-        {
-            WriteLine("Enter Email");
-            email = Utility.GetInputString();
-            if (Utility.isNull(email))
-            {
-                Message();
-                return null!;
-            }
-        }
-
         inputData.Add("Name", null!);
-        inputData.Add("Email", email!);
-        inputData.Add("Mobile", mobile!);
+
+        inputData.Add("Email", Utility.GetInputString("Enter email", true));
+
+        inputData.Add("Mobile", Utility.GetInputString("Enter the mobileno", true));
+
         inputData.Add("Password", null!);
+
         inputData.Add("Type", "AccountHolder");
+
         inputData.Add("Id", null!);
+
         inputData.Add("BankId", null!);
+
         inputData.Add("Balance", null!);
 
         return inputData;
@@ -263,34 +159,30 @@ public class BankingStaffMenu
         else 
             return false;
        
-
     }
 
 
     public void ChangeServiceRate(string? bankId,bool isSame)
     {
+
         Bank model = Utility.GetBankDetails(bankId);
         if (model == null)
-        {
-            WriteLine("Enter valid bankID");
             return;
-        }
 
         if (isSame)
         {
-            WriteLine("Enter serive charge for RTGS in percent ");
-            model.RTGSSame = Convert.ToDouble(Utility.GetInputString());
-            WriteLine("Enter serive charge for IMPS in percent ");
-            model.IMPSSame = Convert.ToDouble(Utility.GetInputString());
+
+            model.RTGSSame = Convert.ToDouble(Utility.GetInputServiceCharge("Enter serive charge for RTGS in percent "));
+
+            model.IMPSSame = Convert.ToDouble(Utility.GetInputServiceCharge("Enter serive charge for IMPS in percent"));
         }
         else
         {
+            model.RTGSDiff = Convert.ToDouble(Utility.GetInputServiceCharge("Enter serive charge for RTGS in percent "));
 
-            WriteLine("Enter serive charge for RTGS in percent ");
-            model.RTGSDiff = Convert.ToDouble(Utility.GetInputString());
-            WriteLine("Enter serive charge for IMPS in percent ");
-            model.IMPSDiff = Convert.ToDouble(Utility.GetInputString());
+            model.IMPSDiff = Convert.ToDouble(Utility.GetInputServiceCharge("Enter serive charge for IMPS in percent "));
 
         }
     }
+
 }

@@ -2,13 +2,15 @@
 {
     public Transaction()
     {
-        this.Id = String.Empty;
 
-        this.BankId = String.Empty;
+        this.Id = string.Empty;
 
-        this.AccountId = String.Empty;
+        this.BankId = string.Empty;
+
+        this.AccountId = string.Empty;
 
     }
+
     public string Id { get; set; } // Transaction Id
 
 	public string BankId { get; set; }
@@ -21,7 +23,9 @@
 
     public DateTime CreatedOn { get; set; }
 
-    public string? CreatedBy { get; set; }
+    public string CreatedBy { get; set; }
+
+    public bool isFundTransfer;
 	
 }
 
