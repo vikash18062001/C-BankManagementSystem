@@ -106,9 +106,9 @@ public class BankingStaffMenu
     
         inputData.Add("Name",name = Utility.GetInputString("Enter the name", true));
 
-        inputData.Add("Email", Utility.GetInputString("Enter email", true));
+        inputData.Add("Email", Utility.GetInputEmail("Enter email", true));
 
-        inputData.Add("Mobile", Utility.GetInputString("Enter the mobileno", true));
+        inputData.Add("Mobile", Utility.GetInputMobileNo("Enter the mobileno", true));
 
         inputData.Add("Password", Utility.GetPassword("Enter password", true));
 
@@ -130,9 +130,9 @@ public class BankingStaffMenu
 
         inputData.Add("Name", null!);
 
-        inputData.Add("Email", Utility.GetInputString("Enter email", true));
+        inputData.Add("Email", Utility.GetInputEmail("Enter email", true));
 
-        inputData.Add("Mobile", Utility.GetInputString("Enter the mobileno", true));
+        inputData.Add("Mobile", Utility.GetInputMobileNo("Enter the mobileno", true));
 
         inputData.Add("Password", null!);
 
@@ -153,7 +153,9 @@ public class BankingStaffMenu
     {
 
         WriteLine("Do you want to change {0} .If yes type Y else anything.", field);
+
         string? input = ReadLine()?.ToLower();
+
         if (input == "y")
             return true;
         else 
@@ -166,6 +168,7 @@ public class BankingStaffMenu
     {
 
         Bank model = Utility.GetBankDetails(bankId);
+
         if (model == null)
             return;
 
@@ -186,3 +189,7 @@ public class BankingStaffMenu
     }
 
 }
+
+//vik44963.47929314815
+
+//viv44963.47946011574

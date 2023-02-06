@@ -135,7 +135,6 @@ public class BankingService
                     return;
                 }
             }
-            
         }
         WriteLine("Please enter valid transaction id");
         return;

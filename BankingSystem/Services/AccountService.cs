@@ -108,6 +108,7 @@ public class AccountService
             Dictionary<string, object> data = getDictionary(accountId1,accountId2, bankId1,bankId2, newAmount, accountHolder1.Name, true);
             if (WithDrawMoney(data))
             {
+                data["Amount"] = amount;
                 DepositMoney(data);
                 Utility.Message(true,"Transferd", "money");
             }
@@ -157,3 +158,6 @@ public class AccountService
         return data;
     }
 }
+
+//vik44963.50194956019
+//vik44963.50226185185

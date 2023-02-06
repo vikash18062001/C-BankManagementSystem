@@ -1,4 +1,5 @@
 ﻿using static System.Console;
+using System.Text.RegularExpressions;
 public static class Utility
 {
     public static int GetIntInput(string helpText , bool isRequired)
@@ -45,6 +46,45 @@ public static class Utility
         return input;
     }
 
+    public static string GetInputEmail(string helpText,bool isRequired)
+    {
+        string? input = string.Empty;
+        WriteLine(helpText);
+        try
+        {
+            input = ReadLine();
+            if((isRequired && !string.IsNullOrEmpty(input)) && IsValidEmail(input))
+            {
+                return input;
+            }
+            return GetInputEmail(helpText, isRequired);
+        }
+        catch(Exception e)
+        {
+            WriteLine("Enter the valid email");
+            return GetInputEmail(helpText, isRequired);
+        }
+    }
+
+    public static string GetInputMobileNo(string helpText,bool isRequired)
+    {
+        string? input = string.Empty;
+        WriteLine(helpText);
+        try
+        {
+            input = ReadLine();
+            if ((isRequired && !string.IsNullOrEmpty(input)) && IsValidMobileNo(input))
+                return input;
+            return GetInputMobileNo(helpText, isRequired);
+
+        }
+        catch(Exception e)
+        {
+            WriteLine("Enter valid mobile no.Mobileno should  be of length 10");
+            return GetInputMobileNo(helpText, isRequired);
+        }
+    }
+
     public static string GetPassword(string helpText, bool isRequired)
     {
         string? input = string.Empty;
@@ -81,7 +121,6 @@ public static class Utility
         {
             return "";
         }
-
     }
     // change the get account Id
     public static string GetAccountId(string name)
@@ -156,7 +195,7 @@ public static class Utility
         }
         catch (Exception e)
         {
-            WriteLine("Enter valid amount");
+            WriteLine("\nEnter valid amount\n");
             return GetInputServiceCharge(helpText);
         }
         return amount;
@@ -170,11 +209,48 @@ public static class Utility
             WriteLine($"{field} Unsuccessful");
     }
 
+    public static bool IsValidEmail(string email)
+    {
+        try
+        {
+            if (email.Contains('@') && email.Length > 6)
+                return true;
+            WriteLine("\nEnter valid email id\n");
+            return false;
+        }
+        catch(Exception e )
+        {
+            WriteLine("\nEnter valid email id\n");
+            return IsValidEmail(email);
+        }
+    }
+
+    public static bool IsValidMobileNo(string mobileNo)
+    {
+        try
+        {
+        string mobileRegex = "^[0-9]{10}";
+        Regex re = new Regex(mobileRegex);
+
+            if (mobileNo.Length == 10 && re.IsMatch(mobileNo))
+            {
+                return true;
+            }
+            WriteLine("\nEnter valid mobileno\n");
+        return false;
+        }
+        catch(Exception e )
+        {
+            WriteLine("\nEnter valid mobileno\n");
+            return IsValidMobileNo(mobileNo);
+        }
+    }
 }
 
-//vik44960 .70793016204
 
-//viv44960.70806070602
+//viv44963.49371486111
+//viv44963.49478612268
 
-   // viv44960.70876670139
-   //give validation for transaction
+
+//vik44963.49390548611
+//vik44963.4944037963
