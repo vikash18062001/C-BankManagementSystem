@@ -8,7 +8,10 @@
 	public double Balance { get; set; }
 
 	public string BankId { get; set; }
-
 }
+
+
+
+
 
 

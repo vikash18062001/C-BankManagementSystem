@@ -1,38 +1,25 @@
 ﻿<Properties StartupConfiguration="{4E0B0A95-F539-4A31-849C-C707AB3637D4}|Default">
-  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
-  <MultiItemStartupConfigurations />
   <MonoDevelop.Ide.ItemProperties.BankingSystem PreferredExecutionTarget="MonoDevelop.Default" />
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.DebuggingService.Breakpoints>
-    <BreakpointStore />
-  </MonoDevelop.Ide.DebuggingService.Breakpoints>
-  <MonoDevelop.Ide.Workbench ActiveDocument="BankingSystem/Utility.cs">
-    <Files>
-      <File FileName="BankingSystem/BankStaffMenu.cs" Line="60" Column="91" />
-      <File FileName="BankingSystem/Program.cs" Line="13" Column="1" />
-      <File FileName="BankingSystem/Models/Bank.cs" Line="1" Column="1" />
-      <File FileName="BankingSystem/AccountHolderMenu.cs" Line="117" Column="1" />
-      <File FileName="BankingSystem/Services/AccountService.cs" Line="69" Column="20" />
-      <File FileName="BankingSystem/Models/Transaction.cs" Line="26" Column="18" />
-      <File FileName="BankingSystem/Models/User.cs" Line="1" Column="1" />
-      <File FileName="BankingSystem/Models/AccountHolder.cs" Line="1" Column="1" />
-      <File FileName="BankingSystem/Services/BankingService.cs" Line="2" Column="1" />
-      <File FileName="BankingSystem/Services/GlobalDataService.cs" Line="5" Column="81" />
-      <File FileName="BankingSystem/Utility.cs" Line="4" Column="1" />
-      <File FileName="BankingSystem/BankApplication.cs" Line="1" Column="1" />
-    </Files>
+  <MonoDevelop.Ide.Workbench>
     <Pads>
       <Pad Id="ProjectPad">
         <State name="__root__">
           <Node name="BankingSystem" expanded="True">
             <Node name="BankingSystem" expanded="True">
               <Node name="Models" expanded="True" />
-              <Node name="Services" expanded="True" />
-              <Node name="Utility.cs" selected="True" />
+              <Node name="Services" expanded="True">
+                <Node name="AccountHolderService.cs" selected="True" />
+              </Node>
             </Node>
           </Node>
         </State>
       </Pad>
     </Pads>
   </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MultiItemStartupConfigurations />
 </Properties>

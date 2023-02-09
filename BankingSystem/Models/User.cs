@@ -15,6 +15,10 @@
 		this.Email = string.Empty;
 	}
 
+	public string CreatedBy { get; set; }
+
+	public DateTime CreatedOn;
+
 	public string Name { get; set; }
 
 	public string Type { get; set; }

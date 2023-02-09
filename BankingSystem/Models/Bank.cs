@@ -2,22 +2,20 @@
 {
     public Bank()
     {
-        this.Id = String.Empty;
+        this.Id = string.Empty;
 
-        this.Name = String.Empty;
+        this.Name = string.Empty;
 
-        this.CreaterName = String.Empty;
-
-        this.Password = String.Empty;
+        this.CreatedBy = string.Empty;
     }
 
     public string Id { get; set; }
 
     public string Name { get; set; }
 
-    public string CreaterName { get; set; }
+    public string CreatedBy { get; set; }
 
-    public string Password { get; set; }
+    public DateTime CreatedOn { get; set; }
 
     public double RTGSSame ;
 
@@ -26,6 +24,5 @@
     public double IMPSSame ;
 
     public double IMPSDiff ;
-
 }
 

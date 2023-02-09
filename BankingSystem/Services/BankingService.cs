@@ -8,63 +8,59 @@ public class BankingService
         try
         {
             bank.Id = Utility.GenerateBankId(bank.Name);
-            if(!string.IsNullOrEmpty(bank.Id) && !string.IsNullOrEmpty(bank.Name) && !string.IsNullOrEmpty(bank.CreaterName))
+            if(!string.IsNullOrEmpty(bank.Id) && !string.IsNullOrEmpty(bank.Name) && !string.IsNullOrEmpty(bank.CreatedBy))
             {
-                GlobalDataService.Bank.Add(bank);
+                GlobalDataService.Banks.Add(bank);
             }
         }
         catch(Exception e)
         {
             
         }
+
         return bank;
     }
-    
-    public bool CreateAccount(Dictionary<string,object> details)
+
+    public bool AddBankEmployee(Employee employee)
     {
-        AccountHolder accountHolder = new AccountHolder();
         try
         {
-            accountHolder.Name = details["Name"].ToString()!;
-            accountHolder.Balance = Convert.ToDouble(details["Balance"]);
-            accountHolder.BankId = details["BankId"].ToString()!;
-            accountHolder.Password = details["Password"].ToString()!;
-            accountHolder.Id = details["Id"].ToString()!;
-            accountHolder.Email = details["Email"].ToString()!;
-            accountHolder.Mobile = details["Mobile"].ToString()!;
-            accountHolder.Type = details["Type"].ToString()!;
-            GlobalDataService.AccountHolder.Add(accountHolder);
+            GlobalDataService.Employees.Add(employee);
+
+            return true;
+           
+        }
+        catch(Exception e)
+        {
+            return false;
+        }
+    }
+    
+    public AccountHolder CreateAccount(AccountHolder AccountHolder)
+    {
+        try
+        {
+            AccountHolder.Id = Utility.GetAccountId(AccountHolder.Name);
+            GlobalDataService.AccountHolders.Add(AccountHolder);
         }
         catch (Exception e)
         {
-            
-            CreateAccount(details);
-            return false;
+            //Log exception
         }
-        return true;
 
-   }
+        return AccountHolder;
+    }
 
-    public bool UpdateAccount(string id , Dictionary<string,object> newDetail)
+    public bool UpdateAccount(string id , Dictionary<string,object> updatedDetails)
     {
-        int flag = 0;
-        foreach (AccountHolder obj in GlobalDataService.AccountHolder)
-        {
-            if (obj?.Id == id)
-            {
-                if (obj?.Id == null)
-                    break;
-                flag = 1;
-                obj.Email = newDetail["Email"].ToString()!;
-                obj.Mobile = newDetail["Mobile"].ToString()!;
-            }
-        }
-        if ( flag == 0 )
-        {
-            
+        List<AccountHolder> accountHolders = (from account in GlobalDataService.AccountHolders where account.Id == id select account).ToList<AccountHolder>();
+
+        if (accountHolders.Count() == 0)
             return false;
-        }
-      
+
+        accountHolders.First().Email = updatedDetails["Email"].ToString()!;
+        accountHolders.First().Mobile = updatedDetails["Mobile"].ToString()!;
+
         return true;
         
     }
@@ -72,7 +68,8 @@ public class BankingService
     public bool DeleteAccount(string id)
     {
         int flag = 0;
-        GlobalDataService.AccountHolder.RemoveAll(r => {
+
+        GlobalDataService.AccountHolders.RemoveAll(r => {
             if (r.Id == id)
             {
                 flag = 1;
@@ -80,101 +77,105 @@ public class BankingService
             }
             return false;
         });
+
         if (flag == 0)
         {
             return false;
         }
-        DeleteTransactinon(id);
-        return true;
+
+        return DeleteTransactinon(id);
         
     }
 
-    public void ShowTransactionHistory( string id, string bankId)
+    public bool ShowTransactionHistory( string id, string bankId)
     {
-        WriteLine("\t\tTransactionId\t\t\t\t\t\tBankId\t\t\tAccountId\tCreatedBy\t\tCreatedOn\t\tAmount\t\tAction\t\tIsFundTransfer\t\t");
-        int flag = 0;
-        string AccountId,BankId;
+        int flag = 0,x,y;
+
         foreach (Transaction transaction in GlobalDataService.Transactions)
         {
-            if(transaction.Id.IndexOf(bankId) != -1 && transaction.Id.IndexOf(id) !=-1)
-            {
+            y = transaction.Id.IndexOf('/', x = transaction.Id.IndexOf('/') + 1);
+            string retrivedBankId = transaction.Id.Substring(x, y - x);
+
+            y = transaction.Id.IndexOf('/', x = transaction.Id.IndexOf('/', transaction.Id.IndexOf('/') + 1) + 1);
+            string accountId = transaction.Id.Substring(x, y - x);
+
+            if (Utility.ShowTransactionTable(transaction, id, bankId, retrivedBankId, accountId))
                 flag = 1;
-                string action = transaction.Type ? "Credit" : "Debit";
-                WriteLine("{0}\t{1}\t{2}\t\t{3}\t\t{4}\t\t{5}\t\t{6}\t\t{7}", transaction.Id, transaction.BankId, transaction.AccountId, transaction.CreatedBy,transaction.CreatedOn,transaction.Amount,action,transaction.isFundTransfer);
-            }
+
         }
+
         if (flag == 0)
-            WriteLine("No Transaction");
+            return false;
+        else
+            return true;
+            
     }
 
-    public void RevertTransaction(string accountId, string bankId)
+    public Utility.StatusMessage RevertTransaction(string accountId,string transId)
     { 
-        string? transId = Utility.GetInputString("Enter the transId you want to revert",true);
-        if (transId == null)
-            return;
+
         foreach(Transaction transaction in GlobalDataService.Transactions)
         {
             if (transaction?.Id == transId)
             {
                 try
                 {
-
-                    AccountHolder detail = Utility.GetDetails(accountId, bankId);
-                    if (transaction.Type)
-                    {
-                        detail.Balance -= transaction.Amount;
-                    }
-                    else
-                        detail.Balance += transaction.Amount;
-                    GlobalDataService.Transactions.Remove(transaction);
-                    return;
+                    RevertTheMoney(transaction, transId);
+                    return Utility.StatusMessage.Success;
                 }
                 catch (Exception e)
                 {
-                    WriteLine("SomeError occured");
-                    return;
+                    return Utility.StatusMessage.Failed;
                 }
             }
         }
-        WriteLine("Please enter valid transaction id");
-        return;
+                
+        return Utility.StatusMessage.Credential;
+
     }
 
-    public void DeleteTransactinon(string? accountId)
+    public bool DeleteTransactinon(string? accountId)
     {
-        GlobalDataService.Transactions.RemoveAll(r=>(r.AccountId == accountId));
-    }
-
-    public void ShowAll(List<AccountHolder> ob, int cursize)
-    {
-        if (ob[0]?.Id != null)
+        try
         {
-            foreach (AccountHolder obj in ob)
-            {
-                if (obj?.Id == null)
-                    break;
-                WriteLine(obj.Id);
-                WriteLine(obj.Name);
-                WriteLine(obj.Mobile);
-                WriteLine(obj.Balance);
-            }
+            GlobalDataService.Transactions.RemoveAll(r => (r.SrcAccountId == accountId));
+            return true;
         }
-        return;
+        catch
+        {
+            return false;
+        }
     }
 
-    public Bank Validate(string bankId, string userName, string password)
+    public void RevertTheMoney(Transaction transaction, string transId)
     {
-        int size = GlobalDataService.Bank.Count();
+        AccountHolder senderAccount = Utility.GetAccountDetail(transaction.SrcAccountId);
+        AccountHolder receiverAccount = Utility.GetAccountDetail(transaction.DstAccountId);
 
-        for (int i = 0; i < size; i++)
+        if (!string.IsNullOrEmpty(transaction.DstAccountId) && transaction.Type)
         {
-            if ((GlobalDataService.Bank[i]?.Id != null) && (GlobalDataService.Bank[i].Id == bankId) && (GlobalDataService.Bank[i].CreaterName == userName) && (GlobalDataService.Bank[i].Password == password))
+            receiverAccount.Balance -= transaction.Amount;
+            senderAccount.Balance += transaction.Amount;
+            GlobalDataService.Transactions.RemoveAll(item => item.Id == transId);
+            return;
+        }
+        else if (string.IsNullOrEmpty(transaction.DstAccountId))
+        {
+            if (transaction.Type)
             {
-                return GlobalDataService.Bank[i];
+                senderAccount.Balance -= transaction.Amount;
             }
+            else
+            {
+                senderAccount.Balance += transaction.Amount;
+            }
+            GlobalDataService.Transactions.RemoveAll(item => item.Id == transId);
+            return;
+
         }
 
-        return null;
+        return;
     }
 
 }
+//TXN/BNKvikash/ACHvikash/44965.94019907407       ACHvikash                       Vikash          2/8/2023 10:33:53 PM            10              Debit

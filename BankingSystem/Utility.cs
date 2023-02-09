@@ -1,7 +1,13 @@
 ﻿using static System.Console;
 using System.Text.RegularExpressions;
+using System;
+
 public static class Utility
 {
+    public enum LoginTypes { Admin, Employee, Accountholder }
+
+    public enum StatusMessage { Balance,Success,Failed,Credential,WrongSelection}
+
     public static int GetIntInput(string helpText , bool isRequired)
     {
         int input = 0;
@@ -9,7 +15,7 @@ public static class Utility
 
         try
         {
-            input = Convert.ToInt32(ReadLine());
+            input = Convert.ToInt32(ReadLine().Trim());
             if (isRequired && input == 0)
             {
                 WriteLine("Enter valid input");
@@ -29,6 +35,7 @@ public static class Utility
     {
         string? input = string.Empty;
         WriteLine(helpText);
+
         try
         {
             input = ReadLine();
@@ -43,7 +50,8 @@ public static class Utility
             WriteLine("Enter valid input");
             return GetInputString(helpText, isRequired);
         }
-        return input;
+
+        return input.Trim();
     }
 
     public static string GetInputEmail(string helpText,bool isRequired)
@@ -55,7 +63,7 @@ public static class Utility
             input = ReadLine();
             if((isRequired && !string.IsNullOrEmpty(input)) && IsValidEmail(input))
             {
-                return input;
+                return input.Trim();
             }
             return GetInputEmail(helpText, isRequired);
         }
@@ -74,7 +82,7 @@ public static class Utility
         {
             input = ReadLine();
             if ((isRequired && !string.IsNullOrEmpty(input)) && IsValidMobileNo(input))
-                return input;
+                return input.Trim();
             return GetInputMobileNo(helpText, isRequired);
 
         }
@@ -108,64 +116,56 @@ public static class Utility
             WriteLine("Enter valid password");
             return GetPassword(helpText, isRequired);
         }
-        return input;
+        return input.Trim();
     }
 
     public static string GenerateBankId(string name)
     {
         try
         {
-            return name.Substring(0, 3) + DateTime.Now.ToOADate();
+            return "BNK"+name.Substring(0, 3) + DateTime.Now.ToOADate();
         }
         catch(Exception e)
         {
-            return "";
+            return string.Empty;
         }
     }
-    // change the get account Id
+
     public static string GetAccountId(string name)
     {
-        string? accountId = name.Substring(0, 3) + DateTime.Now.ToOADate().ToString();
+        string? accountId = "ACH"+name.Substring(0, 3) + DateTime.Now.ToOADate().ToString();
         Console.WriteLine(accountId);
-        return accountId;
+        return accountId.Trim();
     }
 
     public static Bank GetBankDetails(string? id)
     {
-        foreach(Bank model in GlobalDataService.Bank)
-        {
-            if (model.Id == id)
-                return model;
-        }
-        WriteLine("Enter valid id");
-        return null!;
+        Bank bank = DataBaseService.GetBankDetails(id);
+        if (!string.IsNullOrEmpty(bank.Id))
+            return bank;
+
+        WriteLine("Cannot get the bank details.Enter valid id");
+
+        return new Bank();
     }
 
-    public static AccountHolder GetDetails(string? accountId, string? bankId)
+    public static AccountHolder GetAccountDetail(string? accountId)
     {
-        foreach(AccountHolder detail in GlobalDataService.AccountHolder)
-        {
-            if (detail?.Id != null && detail?.Id == accountId && detail?.BankId == bankId)
-                return detail!;
-        }
-        return null!;
-    }
+        AccountHolder accountHolder = DataBaseService.GetAccountDetail(accountId);
 
-    public static bool isNull(string? input)
-    {
-        return String.IsNullOrEmpty(input);
+        if (string.IsNullOrEmpty(accountHolder.Id))
+        {
+            WriteLine("Enter valid id");
+            return new AccountHolder();
+        }
+
+        return accountHolder;
     }
 
     public static bool checkIfValidIdsOrNot(string? bankId,string? accountId)
     {
-        foreach(AccountHolder accountHolder in GlobalDataService.AccountHolder)
-        {
-            if(accountHolder.BankId == bankId && accountHolder.Id == accountId)
-            {
-                return true;
-            }
-        }
-        return false;
+        bool result = DataBaseService.checkIfValidIdsOrNot(bankId, accountId);
+        return result;
     }
 
 
@@ -245,12 +245,97 @@ public static class Utility
             return IsValidMobileNo(mobileNo);
         }
     }
+
+    public static string GetType(LoginRequest login)
+    {
+        if (login.UserId.StartsWith("EMP"))
+        {
+            return Utility.LoginTypes.Employee.ToString();
+        }
+        else if (login.UserId.StartsWith("ACH"))
+        {
+            return Utility.LoginTypes.Accountholder.ToString();
+        }
+        else if(login.UserId.StartsWith("BNK"))
+        {
+            return Utility.LoginTypes.Admin.ToString();
+        }
+        else
+        {
+            return "";
+        }
+      
+    }
+
+    public static string GetEmployeeId(string name)
+    {
+        string? empId = "EMP" + name.Substring(0, 3) + DateTime.Now.ToOADate().ToString();
+        Console.WriteLine(empId);
+        return empId.Trim();
+    }
+
+    public static string GetBankId(string empId)
+    {
+        string bankId = string.Empty;
+        try
+        {
+            bankId = DataBaseService.GetBankId(empId);
+            if (string.IsNullOrEmpty(bankId))
+                WriteLine("Not able to get the bankId");
+            return bankId;
+
+        }
+        catch
+        {
+
+        }
+        return bankId;
+       
+    }
+
+    public static string GetAccountCreaterName(string empId)
+    {
+        string employeeName = string.Empty;
+        try
+        {
+            employeeName = DataBaseService.GetAccountCreaterName(empId);
+            if (string.IsNullOrEmpty(employeeName))
+                WriteLine("Not able to get the employee name. Please enter valid Ids");
+            return employeeName;
+
+        }
+        catch
+        {
+
+        }
+        return employeeName;
+    }
+
+    public static bool ShowTransactionTable(Transaction transaction, string id, string bankId, string retrivedBankId, string accountId)
+    {
+        if((accountId == id && bankId == retrivedBankId ))
+        {
+            if (string.IsNullOrEmpty(transaction.DstAccountId))
+            {
+                string action = transaction.Type ? "Credit" : "Debit";
+                WriteLine("{0}\t{1}\t{2}\t\t{3}\t\t{4}\t\t{5}\t\t{6}", transaction.Id, transaction.SrcAccountId, transaction.DstAccountId, transaction.CreatedBy, transaction.CreatedOn, transaction.Amount, action);
+            }
+            else if(transaction.Type == false)
+            {
+                string action = transaction.Type ? "Credit" : "Debit";
+                WriteLine("{0}\t{1}\t{2}\t\t{3}\t\t{4}\t\t{5}\t\t{6}", transaction.Id, transaction.SrcAccountId, transaction.DstAccountId, transaction.CreatedBy, transaction.CreatedOn, transaction.Amount, action);
+            }
+            return true;
+        }
+        else if(transaction.DstAccountId == id && transaction.Type == true)
+        {
+            string action = transaction.Type ? "Credit" : "Debit";
+            WriteLine("{0}\t{1}\t{2}\t\t{3}\t\t{4}\t\t{5}\t\t{6}", transaction.Id, transaction.SrcAccountId, transaction.DstAccountId, transaction.CreatedBy, transaction.CreatedOn, transaction.Amount, action);
+            return true;
+        }
+
+        return false;
+        
+    }
+
 }
-
-
-//viv44963.49371486111
-//viv44963.49478612268
-
-
-//vik44963.49390548611
-//vik44963.4944037963

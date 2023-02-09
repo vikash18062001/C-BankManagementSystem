@@ -3,65 +3,149 @@
 public class BankApplication
 {
     BankingService BankingService = new BankingService();
+
     public void Initialize()
     {
-        Clear();
-        BankingStaffMenu bankingStaffMenu = new BankingStaffMenu();
-        AccountHolderMenu accountHolderMenu = new AccountHolderMenu();
-        
-        while (true)
-        {
-            WriteLine("****Banking Management System****");
-            WriteLine("\n\n");
-            WriteLine("1 : Create A Bank \n2 : Login as Bank Staff\n3 : Login as Account Holder\n4 : Exit");
-
-            int input = Utility.GetIntInput("Choose a value from the menu",true);
-
-            switch (input)
-            {
-                case 1:
-                    CreateBank();
-                    break;
-
-                case 2:
-                    bankingStaffMenu.HomePage();
-                    break;
-
-                case 3:
-                    accountHolderMenu.HomePage();
-                    break;
-
-                case 4:
-                    Environment.Exit(1);
-                    break;
-
-                default:
-                    WriteLine("Please enter a valid value");
-                    break;
-            }
-        }
+        MainMenu();
     }
 
-    public void CreateBank()
+    private void MainMenu()
     {
-        Bank Bank = new Bank
+        WriteLine("****Banking Management System****\n\n1 : Create A Bank \n2 : Login\n3 : Exit");
+
+        int option = Utility.GetIntInput("Choose a value from the menu", true);
+        switch (option)
+        {
+            case 1:
+                this.CreateBank();
+                MainMenu();
+                break;
+
+            case 2:
+                this.Login();
+                MainMenu();
+                break;
+
+            case 3:
+                Environment.Exit(1);
+                return ;
+
+            default:
+                WriteLine("Please enter a valid value");
+                MainMenu();
+                break;
+        }
+       
+    }
+
+    private void CreateBank()
+    {
+        Bank bank = new Bank()
         {
             Name = Utility.GetInputString("Enter the bank name", true),
-            CreaterName = Utility.GetInputString("Enter the creater name", true),
-            Password = Utility.GetPassword("Enter the password ", true),
+            CreatedBy = Utility.GetInputString("Enter the name of the creater.", true), // Is the Upper Man for that particular bank
+            CreatedOn = DateTime.Now,
         };
-        Bank bank  = BankingService.CreateBank(Bank);
+
+        var employeeName = Utility.GetInputString("Enter the Employee Name You Want to make head for that particular bank",true);
+        var password = Utility.GetPassword("Enter the password ", true);
+
+        bank  = BankingService.CreateBank(bank);
+
         if (string.IsNullOrEmpty(bank.Id))
         {
             WriteLine("Bank creation is unsuccessful");
         }
         else
         {
-            WriteLine(bank.Id);
-            WriteLine("Bank creation is successful");
+            AddEmployeeDetails(bank,employeeName,password);
+            WriteLine($"Bank creation is successful.The bank Id is {bank.Id}");
         }
-        
+    }
+
+    private void AddEmployeeDetails( Bank bank , string employeeName , string password )
+    {
+        Employee employee = new Employee()
+        {
+            Name = employeeName,
+            Password = password,
+            Email = Utility.GetInputEmail("Enter the email ", true),
+            Mobile = Utility.GetInputMobileNo("Enter the mobileno", true),
+            Salary = Utility.GetDoubleAmount("Enter the salary"),
+            Type = Utility.LoginTypes.Employee.ToString(),
+            Id = Utility.GetEmployeeId(employeeName),
+            BankId = bank.Id,
+        };
+
+        if (BankingService.AddBankEmployee(employee))
+            WriteLine($"Successfully added the employee.The employee Id is {employee.Id}");
+        else
+            WriteLine("Unsuccessful opeartion.Some error occured");
+    }
+
+    private void Login()
+    {
+
+        LoginRequest login = new LoginRequest()
+        {
+            UserId = Utility.GetInputString("Enter the Id", true),
+            Password = Utility.GetPassword("Enter the password", true),
+        };
+
+        string type = Utility.GetType(login);
+
+        if (IsValidLogin(type,login))
+        {
+            WriteLine("Succesfully Logged In");
+            login.Type = type;
+            NavigateToUserMenuBy(login);
+        }
+
+    }
+
+    private bool IsValidLogin(string type,LoginRequest login)
+    {
+        if (type == "Admin" || (string.IsNullOrEmpty(type) || !AccountService.IsAuthenticated(login, type)))
+        {
+            WriteLine("Check your credentials either it is incorrect or it ");
+            if (ContinueCurrentProcessOrNot())
+                Login();
+            else
+                return false;
+        }
+
+        return true;
+    }
+
+    private bool ContinueCurrentProcessOrNot()
+    {
+        WriteLine("Do you want to continure login . If yes type y and if NO type anything");
+        string ch = ReadLine().ToLower();
+
+        if (ch == "y")
+            return true;
+        else
+            return false;
+
+    }
+
+    private void NavigateToUserMenuBy(LoginRequest login)
+    {
+        BankingStaff bankingStaffMenu = new BankingStaff();
+        AccountHolderMenu accountHolderMenu = new AccountHolderMenu();
+
+        if(login.Type == Utility.LoginTypes.Admin.ToString())
+        {
+            bankingStaffMenu.HomePage(login);
+        }
+        else if(login.Type == Utility.LoginTypes.Employee.ToString())
+        {
+            bankingStaffMenu.HomePage(login);
+        }
+        else if(login.Type == Utility.LoginTypes.Accountholder.ToString())
+        {
+            accountHolderMenu.HomePage(login);
+        }
+                
     }
 }
-
-
