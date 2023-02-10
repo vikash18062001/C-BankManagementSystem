@@ -52,7 +52,7 @@ public class BankApplication
 
         bank  = BankingService.CreateBank(bank);
 
-        if (string.IsNullOrEmpty(bank.Id))
+        if (bank != null && string.IsNullOrEmpty(bank.Id))
         {
             WriteLine("Bank creation is unsuccessful");
         }
@@ -72,20 +72,17 @@ public class BankApplication
             Email = Utility.GetInputEmail("Enter the email ", true),
             Mobile = Utility.GetInputMobileNo("Enter the mobileno", true),
             Salary = Utility.GetDoubleAmount("Enter the salary"),
-            Type = Utility.LoginTypes.Employee.ToString(),
-            Id = Utility.GetEmployeeId(employeeName),
+            Type = Enums.LoginTypes.Employee.ToString(),
+            Id = BankingService.GetEmployeeId(employeeName),
             BankId = bank.Id,
         };
 
-        if (BankingService.AddBankEmployee(employee))
-            WriteLine($"Successfully added the employee.The employee Id is {employee.Id}");
-        else
-            WriteLine("Unsuccessful opeartion.Some error occured");
+        APIResponse response = BankingService.AddBankEmployee(employee);
+        WriteLine(response.Message);    
     }
 
     private void Login()
     {
-
         LoginRequest login = new LoginRequest()
         {
             UserId = Utility.GetInputString("Enter the Id", true),
@@ -120,7 +117,7 @@ public class BankApplication
     private bool ContinueCurrentProcessOrNot()
     {
         WriteLine("Do you want to continure login . If yes type y and if NO type anything");
-        string ch = ReadLine().ToLower();
+        string ch = ReadLine().ToLower().Trim();
 
         if (ch == "y")
             return true;
@@ -134,15 +131,15 @@ public class BankApplication
         BankingStaff bankingStaffMenu = new BankingStaff();
         AccountHolderMenu accountHolderMenu = new AccountHolderMenu();
 
-        if(login.Type == Utility.LoginTypes.Admin.ToString())
+        if(login.Type == Enums.LoginTypes.Admin.ToString())
         {
             bankingStaffMenu.HomePage(login);
         }
-        else if(login.Type == Utility.LoginTypes.Employee.ToString())
+        else if(login.Type == Enums.LoginTypes.Employee.ToString())
         {
             bankingStaffMenu.HomePage(login);
         }
-        else if(login.Type == Utility.LoginTypes.Accountholder.ToString())
+        else if(login.Type == Enums.LoginTypes.Accountholder.ToString())
         {
             accountHolderMenu.HomePage(login);
         }

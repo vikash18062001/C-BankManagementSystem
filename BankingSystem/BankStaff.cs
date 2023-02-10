@@ -4,6 +4,7 @@ public class BankingStaff
 {
 
     BankingService BankingService = new BankingService();
+    AccountHolderService AccountHolderService = new AccountHolderService();
 
     public void HomePage(LoginRequest login)
     {
@@ -20,12 +21,12 @@ public class BankingStaff
                         return ;
 
                     case 2:
-                        this.UpdateAccount();
+                        this.UpdateAccount(login);
                         HomePage(login);
                         return;
 
                     case 3:
-                        this.DeleteAccount();
+                        this.DeleteAccount(login);
                         HomePage(login);
                         return;
 
@@ -75,19 +76,26 @@ public class BankingStaff
                 Email = Utility.GetInputEmail("Enter the email", true),
                 Mobile = Utility.GetInputMobileNo("Enter the mobile no ", true),
                 Password = Utility.GetPassword("Enter the password for the account", true),
-                BankId = Utility.GetBankId(login.UserId),
                 CreatedOn = DateTime.Now,
-                CreatedBy = Utility.GetAccountCreaterName(login.UserId),
             };
-
-            Accountholder = BankingService.CreateAccount(Accountholder);
-            if (Accountholder.Id == null)
+            string bankId = BankingService.GetBankId(login.UserId);
+            string createdBy = AccountService.GetAccountCreaterName(login.UserId);
+            if(string.IsNullOrEmpty(createdBy))
             {
-                WriteLine("Account Creation Unsuccessful");
-                this.CreateAccountHolder(login);
+                WriteLine("Not able to create account");
+
+                return;
+            }    
+            if (string.IsNullOrEmpty(bankId))
+            {
+                WriteLine("Not able to get the bank id please check your credentail");
+
+                return;
             }
-            else
-                Utility.Message(true, "created");
+            Accountholder.BankId = bankId;
+            Accountholder.CreatedBy = createdBy;
+            APIResponse  response = BankingService.CreateAccount(Accountholder);
+            WriteLine(response.Message);
         }
         catch (Exception ex)
         {
@@ -95,73 +103,71 @@ public class BankingStaff
         }
     }
 
-    private void UpdateAccount()
+    private void UpdateAccount(LoginRequest login)
     {
         string curId = Utility.GetInputString("Enter your accountId", true);
         if (curId == null)
             return;
+        string empBankId = BankingService.GetBankId(login.UserId);
 
-        string bankId = Utility.GetAccountDetail(curId).BankId;
-
-        if (!Utility.checkIfValidIdsOrNot(bankId, curId))
+        AccountHolder accountHolder = AccountHolderService.GetAccountHolder(curId);
+        if (accountHolder == null || string.IsNullOrEmpty(accountHolder.BankId) || accountHolder.BankId != empBankId)
         {
-            WriteLine("No account Found");
-                return;
+            WriteLine("No account found check the credential");
+            return;
         }
-
+        APIResponse apiResponse = BankingService.checkIfValidIdsOrNot(accountHolder.BankId, curId);
+        WriteLine(apiResponse.Message);
+        if (!apiResponse.IsSuccess)
+            return;
 
         Dictionary<string, object> updatedData = new Dictionary<string, object>();
-
         updatedData.Add("Email", Utility.GetInputEmail("Enter email", true));
-
         updatedData.Add("Mobile", Utility.GetInputMobileNo("Enter the mobileno", true));
 
-        if (BankingService.UpdateAccount(curId, updatedData))
-            Utility.Message(true, "updated");
-        else
-            Utility.Message(false, "Updation");
+        APIResponse resposne = BankingService.UpdateAccount(curId, updatedData);
+        WriteLine(apiResponse.Message);
     }
 
-    private void DeleteAccount()
+    private void DeleteAccount(LoginRequest login)
     {
 
         string curId = Utility.GetInputString("Enter your accountId", true);
-
         if (curId == null)
             return;
+        string empBankId = BankingService.GetBankId(login.UserId);
 
-        string bankId = Utility.GetAccountDetail(curId).BankId;
-
-        if (!Utility.checkIfValidIdsOrNot(bankId, curId))
+        AccountHolder accountHolder = AccountHolderService.GetAccountHolder(curId);
+        if(accountHolder == null || string.IsNullOrEmpty(accountHolder.BankId) || accountHolder.BankId != empBankId)
         {
-            WriteLine("No account Found");
+            WriteLine("No account found check the credential");
             return;
         }
-
-        if (BankingService.DeleteAccount(curId))
-            Utility.Message(true, "deleted");
-        else
-            Utility.Message(false, "Deletion");
-
+        APIResponse apiResponse = BankingService.checkIfValidIdsOrNot(accountHolder.BankId, curId);
+        WriteLine(apiResponse.Message);
+        if(apiResponse.IsSuccess)
+        {
+            APIResponse response = BankingService.DeleteAccount(curId);
+            WriteLine(response.Message);
+        }
     }
 
     private void ChangeServiceRate(bool isSame,LoginRequest login)
     {
         string curId = Utility.GetInputString("Enter the bankId you want to change service", true);
+        string bankId = BankingService.GetBankId(login.UserId);
 
-        string bankId = Utility.GetBankId(login.UserId);
-
-        if(curId != bankId)
+        if(string.IsNullOrEmpty(bankId) || curId != bankId)
         {
             WriteLine("Please enter valid id");
             return;
         }
-
-        Bank bankDetail = Utility.GetBankDetails(curId);
-
-        if (string.IsNullOrEmpty(bankDetail.Id))
+        Bank bankDetail = BankingService.GetBankDetails(curId);
+        if (bankDetail != null && string.IsNullOrEmpty(bankDetail.Id))
+        {
+            WriteLine("Cannot find the bank please enter valid id");
             return;
-
+        }
         if (isSame)
         {
             bankDetail.RTGSSame = Convert.ToDouble(Utility.GetInputServiceCharge("Enter serive charge for RTGS in percent "));
@@ -180,20 +186,24 @@ public class BankingStaff
         if (curId == null)
             return ;
 
-        string newBankId = Utility.GetAccountDetail(curId).BankId;
-
-        string bankId = Utility.GetBankId(login.UserId);
-
-        if (newBankId != bankId)
+        AccountHolder accountHolder = AccountHolderService.GetAccountHolder(curId);
+        if (accountHolder == null || string.IsNullOrEmpty(accountHolder.BankId))
+        {
+            WriteLine("No account found please check the credential");
+            return;
+        }
+        string bankId = BankingService.GetBankId(login.UserId);
+        if (string.IsNullOrEmpty(bankId) || accountHolder.BankId != bankId)
         {
             WriteLine("No account found");
             return;
         }
-
         WriteLine("\t\tTransactionId\t\t\t\t\t\tSrcAccountId\t\tDstAccountId\t\tCreatedBy\t\tCreatedOn\t\tAmount\t\tAction\t\t");
-
-        if(!BankingService.ShowTransactionHistory(curId, bankId))
+        List<Transaction> userTransactions= BankingService.ShowTransactionHistory(curId, bankId);
+        if (userTransactions.Count == 0)
             WriteLine("No Transaction.Check you Ids or you don't have any transaction");
+        else
+            this.ShowAllTransaction(userTransactions);
 
     }
 
@@ -207,13 +217,17 @@ public class BankingStaff
         if (transId == null)
             return;
 
-        Utility.StatusMessage result = BankingService.RevertTransaction(curId,transId);
-        if (result == Utility.StatusMessage.Success)
-            WriteLine("Successfully Revert Money");
-        else if (result == Utility.StatusMessage.Failed)
-            WriteLine("Some error occured due to which transfer is unsucessful");
-        else if (result == Utility.StatusMessage.Credential)
-            WriteLine("Enter valid credentail");
+        APIResponse response = BankingService.RevertTransaction(transId,curId);
+        WriteLine(response.Message);
+    }
+
+    public void ShowAllTransaction(List<Transaction> userTransactions)
+    {
+        foreach (Transaction transaction in userTransactions)
+        {
+            string action = transaction.Type ? "Credit" : "Debit";
+            WriteLine("{0}\t{1}\t{2}\t\t{3}\t\t{4}\t\t{5}\t\t{6}", transaction.Id, transaction.SrcAccountId, transaction.DstAccountId, transaction.CreatedBy, transaction.CreatedOn, transaction.Amount, action);
+        }
     }
 
 }

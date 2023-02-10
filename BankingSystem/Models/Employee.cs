@@ -4,6 +4,7 @@
     {
         this.BankId = string.Empty;
     }
+
     public double Salary;
 
     public string BankId;

@@ -13,16 +13,16 @@
 
     public string Name { get; set; }
 
+    public double RTGSSame;
+
+    public double RTGSDiff;
+
+    public double IMPSSame;
+
+    public double IMPSDiff;
+
     public string CreatedBy { get; set; }
 
     public DateTime CreatedOn { get; set; }
-
-    public double RTGSSame ;
-
-    public double RTGSDiff ;
-
-    public double IMPSSame ;
-
-    public double IMPSDiff ;
 }
 

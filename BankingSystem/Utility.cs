@@ -1,13 +1,9 @@
 ﻿using static System.Console;
 using System.Text.RegularExpressions;
-using System;
+using System.Transactions;
 
 public static class Utility
 {
-    public enum LoginTypes { Admin, Employee, Accountholder }
-
-    public enum StatusMessage { Balance,Success,Failed,Credential,WrongSelection}
-
     public static int GetIntInput(string helpText , bool isRequired)
     {
         int input = 0;
@@ -107,7 +103,7 @@ public static class Utility
             }
             else if(input.Length < 6)
             {
-                WriteLine("Enter strong password");
+                WriteLine("Enter valid password.It must be atleast of 6 character");
                 return GetPassword(helpText, isRequired);
             }
         }
@@ -119,63 +115,13 @@ public static class Utility
         return input.Trim();
     }
 
-    public static string GenerateBankId(string name)
-    {
-        try
-        {
-            return "BNK"+name.Substring(0, 3) + DateTime.Now.ToOADate();
-        }
-        catch(Exception e)
-        {
-            return string.Empty;
-        }
-    }
-
-    public static string GetAccountId(string name)
-    {
-        string? accountId = "ACH"+name.Substring(0, 3) + DateTime.Now.ToOADate().ToString();
-        Console.WriteLine(accountId);
-        return accountId.Trim();
-    }
-
-    public static Bank GetBankDetails(string? id)
-    {
-        Bank bank = DataBaseService.GetBankDetails(id);
-        if (!string.IsNullOrEmpty(bank.Id))
-            return bank;
-
-        WriteLine("Cannot get the bank details.Enter valid id");
-
-        return new Bank();
-    }
-
-    public static AccountHolder GetAccountDetail(string? accountId)
-    {
-        AccountHolder accountHolder = DataBaseService.GetAccountDetail(accountId);
-
-        if (string.IsNullOrEmpty(accountHolder.Id))
-        {
-            WriteLine("Enter valid id");
-            return new AccountHolder();
-        }
-
-        return accountHolder;
-    }
-
-    public static bool checkIfValidIdsOrNot(string? bankId,string? accountId)
-    {
-        bool result = DataBaseService.checkIfValidIdsOrNot(bankId, accountId);
-        return result;
-    }
-
-
     public static double GetInputServiceCharge(string helpText )
     {
         double rate;
         WriteLine(helpText);
         try
         {
-            rate = Convert.ToDouble(ReadLine());
+            rate = Convert.ToDouble(ReadLine().Trim());
         }
         catch (Exception e)
         {
@@ -191,7 +137,7 @@ public static class Utility
         WriteLine(helpText);
         try
         {
-            amount = Convert.ToDouble(ReadLine());
+            amount = Convert.ToDouble(ReadLine().Trim());
         }
         catch (Exception e)
         {
@@ -215,6 +161,7 @@ public static class Utility
         {
             if (email.Contains('@') && email.Length > 6)
                 return true;
+
             WriteLine("\nEnter valid email id\n");
             return false;
         }
@@ -250,92 +197,32 @@ public static class Utility
     {
         if (login.UserId.StartsWith("EMP"))
         {
-            return Utility.LoginTypes.Employee.ToString();
+            return Enums.LoginTypes.Employee.ToString();
         }
         else if (login.UserId.StartsWith("ACH"))
         {
-            return Utility.LoginTypes.Accountholder.ToString();
+            return Enums.LoginTypes.Accountholder.ToString();
         }
         else if(login.UserId.StartsWith("BNK"))
         {
-            return Utility.LoginTypes.Admin.ToString();
+            return Enums.LoginTypes.Admin.ToString();
         }
         else
         {
-            return "";
+            return string.Empty;
         }
       
     }
 
-    public static string GetEmployeeId(string name)
+    public static APIResponse SetApiMessage(bool isSuccess, string message)
     {
-        string? empId = "EMP" + name.Substring(0, 3) + DateTime.Now.ToOADate().ToString();
-        Console.WriteLine(empId);
-        return empId.Trim();
-    }
-
-    public static string GetBankId(string empId)
-    {
-        string bankId = string.Empty;
-        try
+        APIResponse response = new APIResponse()
         {
-            bankId = DataBaseService.GetBankId(empId);
-            if (string.IsNullOrEmpty(bankId))
-                WriteLine("Not able to get the bankId");
-            return bankId;
+            IsSuccess = isSuccess,
+            Message = message
+        };
 
-        }
-        catch
-        {
-
-        }
-        return bankId;
-       
-    }
-
-    public static string GetAccountCreaterName(string empId)
-    {
-        string employeeName = string.Empty;
-        try
-        {
-            employeeName = DataBaseService.GetAccountCreaterName(empId);
-            if (string.IsNullOrEmpty(employeeName))
-                WriteLine("Not able to get the employee name. Please enter valid Ids");
-            return employeeName;
-
-        }
-        catch
-        {
-
-        }
-        return employeeName;
-    }
-
-    public static bool ShowTransactionTable(Transaction transaction, string id, string bankId, string retrivedBankId, string accountId)
-    {
-        if((accountId == id && bankId == retrivedBankId ))
-        {
-            if (string.IsNullOrEmpty(transaction.DstAccountId))
-            {
-                string action = transaction.Type ? "Credit" : "Debit";
-                WriteLine("{0}\t{1}\t{2}\t\t{3}\t\t{4}\t\t{5}\t\t{6}", transaction.Id, transaction.SrcAccountId, transaction.DstAccountId, transaction.CreatedBy, transaction.CreatedOn, transaction.Amount, action);
-            }
-            else if(transaction.Type == false)
-            {
-                string action = transaction.Type ? "Credit" : "Debit";
-                WriteLine("{0}\t{1}\t{2}\t\t{3}\t\t{4}\t\t{5}\t\t{6}", transaction.Id, transaction.SrcAccountId, transaction.DstAccountId, transaction.CreatedBy, transaction.CreatedOn, transaction.Amount, action);
-            }
-            return true;
-        }
-        else if(transaction.DstAccountId == id && transaction.Type == true)
-        {
-            string action = transaction.Type ? "Credit" : "Debit";
-            WriteLine("{0}\t{1}\t{2}\t\t{3}\t\t{4}\t\t{5}\t\t{6}", transaction.Id, transaction.SrcAccountId, transaction.DstAccountId, transaction.CreatedBy, transaction.CreatedOn, transaction.Amount, action);
-            return true;
-        }
-
-        return false;
-        
+        return response;
     }
 
 }

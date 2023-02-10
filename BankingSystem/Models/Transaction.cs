@@ -10,7 +10,6 @@
         this.DstAccountId = string.Empty;
 
         this.CreatedBy = string.Empty;
-
     }
 
     public string Id { get; set; } // Transaction Id

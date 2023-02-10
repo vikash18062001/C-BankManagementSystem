@@ -1,10 +1,9 @@
-﻿using System;
-using static System.Console;
+﻿using static System.Console;
 
 public class AccountHolderMenu
 {
-
     AccountHolderService AccountHolderService = new AccountHolderService();
+    BankingService BankingService = new BankingService();
 
     public void HomePage(LoginRequest login)
     {
@@ -22,7 +21,7 @@ public class AccountHolderMenu
     private void Menu(LoginRequest login)
     {
 
-        AccountHolder accountDetail = Utility.GetAccountDetail(login.UserId);
+        AccountHolder accountDetail = this.AccountHolderService.GetAccountHolder(login.UserId);
 
         WriteLine("\n\n*****Account Holder Menu*****\n\n1 : Deposit amount\n2 : WithDraw amount\n3 : Transfer funds\n4 : Get transaction history\n5 : Return to previous menu");
 
@@ -31,12 +30,12 @@ public class AccountHolderMenu
         switch (option)
         {
             case 1:
-                this.DepositMoney(accountDetail);
+                this.Deposit(accountDetail);
                 Menu(login);
                 return;
 
             case 2:
-                this.WithdrawMoney(accountDetail);
+                this.Withdraw(accountDetail);
                 Menu(login);
                 return;
 
@@ -61,7 +60,7 @@ public class AccountHolderMenu
         }
     }
 
-    private void DepositMoney(AccountHolder accountHolder)
+    private void Deposit(AccountHolder accountHolder)
     {
         double amount = Utility.GetDoubleAmount("Enter the amount to deposit");
 
@@ -73,13 +72,11 @@ public class AccountHolderMenu
         transaction.Type = true;
         transaction.Id = $"TXN/{accountHolder.BankId}/{accountHolder.Id}/{DateTime.Now.ToOADate()}";
 
-        if (!AccountHolderService.DepositMoney(transaction))
-            WriteLine("Enter valid credentials");
-        else
-            WriteLine("Successfully Deposited");
+        APIResponse apiResponse = BankingService.Deposit(transaction);
+        WriteLine(apiResponse.Message);
     }
 
-    private void WithdrawMoney(AccountHolder accountHolder)
+    private void Withdraw(AccountHolder accountHolder)
     {
         double amount = Utility.GetDoubleAmount("Enter the amount to withdraw");
 
@@ -91,19 +88,8 @@ public class AccountHolderMenu
         transaction.Type = false;
         transaction.Id = $"TXN/{accountHolder.BankId}/{accountHolder.Id}/{DateTime.Now.ToOADate()}";
 
-        Utility.StatusMessage result = AccountHolderService.WithDrawMoney(transaction);
-        if (result == Utility.StatusMessage.Success)
-        {
-            WriteLine("Successful withdraw");
-        }
-        else if (result == Utility.StatusMessage.Balance)
-        {
-            WriteLine("Not enough money . Cur balance:{0}", accountHolder.Balance);
-        }
-        else
-        {
-            WriteLine("Withdraw unsucessful check the credentials");
-        }
+        APIResponse apiResponse = BankingService.WithDraw(transaction);
+        WriteLine(apiResponse.Message);
 
     }
 
@@ -113,22 +99,27 @@ public class AccountHolderMenu
         string accountId = Utility.GetInputString("Enter accountId of the user you want to transfer money", true);
         double money = Utility.GetDoubleAmount("Enter amount you want to transfer");
 
-        if(accountId == currentAccountHolder.Id)
+        if (accountId == currentAccountHolder.Id)
         {
             WriteLine("Cannot transfer to the same account");
             return;
         }
 
-        if (Utility.checkIfValidIdsOrNot(currentAccountHolder.BankId, currentAccountHolder.Id) && Utility.checkIfValidIdsOrNot(bankId, accountId))
+        APIResponse response = BankingService.checkIfValidIdsOrNot(currentAccountHolder.BankId, currentAccountHolder.Id);
+        if (response.IsSuccess)
         {
-            int mode = Utility.GetIntInput("Which mode is this 1:RTGS , 2 : IMPS", true);
-            Utility.StatusMessage result = AccountHolderService.TransferFund(currentAccountHolder, accountId, money, mode);
-            ShowMessage(result);
+            APIResponse response2 = BankingService.checkIfValidIdsOrNot(bankId, accountId);
+            if (response2.IsSuccess)
+            {
+                int mode = Utility.GetIntInput("Which mode is this 1:RTGS , 2 : IMPS", true);
+                APIResponse response3 = AccountHolderService.MakeTransferFundObject(currentAccountHolder, accountId, money, mode);
+                WriteLine(response3.Message);
+            }
+            else
+                WriteLine(response2.Message);
         }
         else
-            WriteLine("Enter valid ids");
-        return;
-
+            WriteLine(response.Message);
     }
 
     private void ShowTransactionHistory(AccountHolder accountHolder)
@@ -137,19 +128,23 @@ public class AccountHolderMenu
 
         WriteLine("\t\tTransactionId\t\t\t\t\t\tSrcAccountId\t\tDstAccountId\t\tCreatedBy\t\tCreatedOn\t\tAmount\t\tAction\t\t");
 
-        AccountHolderService.ShowTransactionHistory(accountHolder.Id, accountHolder.BankId);
+        List<Transaction> userTransaction = AccountHolderService.ShowTransactionHistory(accountHolder.Id, accountHolder.BankId);
+        if(userTransaction.Count() != 0)
+            ShowAllTransaction(userTransaction);
+        else
+        {
+            WriteLine("No transaction found");
+        }
+
     }
 
-   private void ShowMessage(Utility.StatusMessage result)
+    public void ShowAllTransaction(List<Transaction> userTransactions)
     {
-        if (result == Utility.StatusMessage.Success)
-            Utility.Message(true, "Transferd", "money");
-        else if (result == Utility.StatusMessage.Balance)
-            WriteLine("Not Enough balance");
-        else if (result == Utility.StatusMessage.Failed)
-            Utility.Message(false, "Transfer");
-        else if (result == Utility.StatusMessage.WrongSelection)
-            WriteLine("Enter correct mode");
+        foreach (Transaction transaction in userTransactions)
+        {
+            string action = transaction.Type ? "Credit" : "Debit";
+            WriteLine("{0}\t{1}\t{2}\t\t{3}\t\t{4}\t\t{5}\t\t{6}", transaction.Id, transaction.SrcAccountId, transaction.DstAccountId, transaction.CreatedBy, transaction.CreatedOn, transaction.Amount, action);
+        }
     }
 
 }
