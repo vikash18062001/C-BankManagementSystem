@@ -1,107 +1,18 @@
 ﻿using System.Reflection;
 using static System.Console;
 
-public class AccountHolderService 
-{
-    public APIResponse TransferFund(TransferFund transferFund)
-    {
-       
-        try
-        {           
-            Transaction transaction = this.GetTransactionDetail(transferFund.SrcAccountHolder, transferFund.DstAccountHolder.Id, transferFund.OriginalAmount);
-
-            return MakeTransfer(transaction, transferFund.NewAmount);
-        }
-        catch(Exception ex)
-        {
-            return Utility.SetApiMessage(false, "Unexcepted error came please try again");
-        }
-    }
-
-    public APIResponse MakeTransfer(Transaction transaction, double amountAfterCharges)
-    {
-        if (transaction != null)
-        {
-            return TransferMoneyFromSender(transaction, amountAfterCharges);
-        }
-
-        return Utility.SetApiMessage(false, "Some error occured");
-    }
-
-    public APIResponse TransferMoneyFromSender(Transaction transaction  , double amountAfterCharges)
-    {
-        try
-        {
-            AccountHolder accountHolder = this.GetAccountHolder(transaction.SrcAccountId);
-            if (accountHolder == null || string.IsNullOrEmpty(accountHolder.BankId))
-                return Utility.SetApiMessage(false, "Not able to find the account please check the id");
-            if (accountHolder.Balance < amountAfterCharges)
-                return Utility.SetApiMessage(false, $"Not enough balance on your account {accountHolder.Balance}");
-
-            if (DepositMoneyToReceiver(transaction, transaction.Amount))
-            {
-                return MakeTransactionObject(accountHolder, transaction, amountAfterCharges); // have to create new transaction because previous one is getting changed for both of them ads it is call by reference.
-            }
-
-            return Utility.SetApiMessage(false, "Transfer is Unsuccesful check id");
-        }
-        catch (Exception ex)
-        { }
-        return Utility.SetApiMessage(false, "Transfer is unsuccesful check id");
-    }
-
-    public APIResponse MakeTransactionObject(AccountHolder accountHolder,Transaction transaction,double amountAfterCharges)
-    {
-        APIResponse apiResponse = new APIResponse();
-        try
-        {
-            Transaction newTransaction = GetTransactionDetail(accountHolder, transaction.DstAccountId, amountAfterCharges); // have to create new transaction because previous one is getting changed for both of them ads it is call by reference.
-            newTransaction.Id = transaction.Id;
-            newTransaction.Type = false;
-            newTransaction.Amount = amountAfterCharges;
-            GlobalData.Transactions.Add(newTransaction);
-            accountHolder.Balance -= amountAfterCharges;
-            apiResponse = Utility.SetApiMessage(true, "Successfully transferred the money");
-        }
-        catch
-        {
-            apiResponse = Utility.SetApiMessage(false, "Some error occured please try again");
-        }
-        return apiResponse;
-    }
-
-    public bool DepositMoneyToReceiver(Transaction transaction, double transferAmount)
-    {
-        try
-        {
-            AccountHolder accountHolder = this.GetAccountHolder(transaction.DstAccountId);
-            if (accountHolder == null || string.IsNullOrEmpty(accountHolder.Id))
-                return false;
-
-            accountHolder.Balance += transferAmount;
-            transaction.Type = true;
-            transaction.Amount = transferAmount;
-            GlobalData.Transactions.Add(transaction);
-            return true;
-        }
-        catch (Exception ex)
-        {
-
-        }
-        return false;
-
-    }
-
-    public List<Transaction> ShowTransactionHistory(string id, string bankId)
+public class AccountHolderService
+{ 
+    public List<Transaction> GetTransactionHistory(string id, string bankId)
     {
         BankingService bankingService = new BankingService();
 
-        List<Transaction> userTransaction = bankingService.ShowTransactionHistory(id, bankId);
+        List<Transaction> userTransaction = bankingService.GetTransactionHistory(id, bankId);
 
         return userTransaction;
     }
 
-    public Transaction GetTransactionDetail(AccountHolder accountHolder , string receiverAccountId,double transactionAmount)
+    public Transaction TransactionInfo(AccountHolder accountHolder , string receiverAccountId,double transactionAmount)
     {
         try
         {
@@ -188,7 +99,7 @@ public class AccountHolderService
 
     public APIResponse MakeTransferFundObject(AccountHolder currentAccountHolder, string receiverAccountId, double transferAmount, int modeOfTransfer)
     {
-        Bank srcBank = BankingService.GetBankDetails(currentAccountHolder.BankId);
+        Bank srcBank = BankingService.GetBankDetail(currentAccountHolder.BankId);
         if (srcBank == null)
             return Utility.SetApiMessage(false, "Please enter correct id");
 
@@ -209,12 +120,11 @@ public class AccountHolderService
             OriginalAmount = transferAmount
         };
 
-        return SetNewAmountBasedOnCharges(transferFund);
+        return SetNewAmountBasedOnCharge(transferFund);
 
     }
-    public APIResponse SetNewAmountBasedOnCharges(TransferFund transferFund)
+    public APIResponse SetNewAmountBasedOnCharge(TransferFund transferFund)
     {
-
         double charge, newAmount = transferFund.OriginalAmount;
 
         if (transferFund.SrcAccountHolder.BankId == transferFund.DstAccountHolder.BankId)
@@ -240,6 +150,66 @@ public class AccountHolderService
         }
         transferFund.NewAmount = newAmount;
 
-        return TransferFund(transferFund);
+        return MakeTransfer(transferFund);
+    }
+
+    public APIResponse MakeTransfer(TransferFund transferFund)
+    {
+        try
+        {
+            AccountHolder srcAccountHolder = this.GetAccountHolder(transferFund.SrcAccountHolder.Id);
+            AccountHolder dstAccountHolder = this.GetAccountHolder(transferFund.DstAccountHolder.Id);
+            if (srcAccountHolder == null || string.IsNullOrEmpty(srcAccountHolder.BankId) || dstAccountHolder == null || string.IsNullOrEmpty(dstAccountHolder.Id))
+                return Utility.SetApiMessage(false, "Not able to find the account please check the id");
+            if (srcAccountHolder.Balance < transferFund.NewAmount)
+                return Utility.SetApiMessage(false, $"Not enough balance on your account {srcAccountHolder.Balance}");
+
+            Transaction transaction = WithDrawMoneyFromSender(transferFund);
+
+            if(transaction != null && !string.IsNullOrEmpty(transaction.Id))
+                return DepositMoneyToReceiver(transferFund,transaction); 
+
+            return Utility.SetApiMessage(false, "Transfer is Unsuccesful check id");
+        }
+        catch (Exception ex)
+        { }
+        return Utility.SetApiMessage(false, "Transfer is unsuccesful check id");
+    }
+
+    public APIResponse DepositMoneyToReceiver(TransferFund transferFund , Transaction transaction)
+    {
+        APIResponse apiResponse = new APIResponse();
+        try
+        {
+            Transaction newTransaction = TransactionInfo(transferFund.SrcAccountHolder, transferFund.DstAccountHolder.Id,transferFund.OriginalAmount); // have to create new transaction because previous one is getting changed for both of them ads it is call by reference.
+            newTransaction.Id = transaction.Id;
+            newTransaction.Type = true;
+            transferFund.DstAccountHolder.Balance += transferFund.OriginalAmount;
+            transferFund.SrcAccountHolder.Balance -= transferFund.NewAmount;
+            GlobalData.Transactions.Add(transaction);
+            GlobalData.Transactions.Add(newTransaction);
+            apiResponse = Utility.SetApiMessage(true, "Successfully transferred the money");
+        }
+        catch (Exception ex)
+        {
+            apiResponse = Utility.SetApiMessage(false, "Some error occured please try again");
+        }
+
+        return apiResponse;
+    }
+
+    public Transaction WithDrawMoneyFromSender(TransferFund transfer)
+    {
+        try
+        {
+            Transaction transaction = TransactionInfo(transfer.SrcAccountHolder, transfer.DstAccountHolder.Id, transfer.NewAmount); // have to create new transaction because previous one is getting changed for both of them ads it is call by reference.
+            transaction.Type = false;
+            transaction.Amount = transfer.NewAmount;
+            return transaction;
+        }
+        catch
+        {
+            return null;
+        }
     }
 }

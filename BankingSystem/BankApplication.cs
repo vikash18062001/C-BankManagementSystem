@@ -58,7 +58,7 @@ public class BankApplication
         }
         else
         {
-            AddEmployeeDetails(bank,employeeName,password);
+            this.AddEmployeeDetails(bank,employeeName,password);
             WriteLine($"Bank creation is successful.The bank Id is {bank.Id}");
         }
     }
@@ -95,7 +95,7 @@ public class BankApplication
         {
             WriteLine("Succesfully Logged In");
             login.Type = type;
-            NavigateToUserMenuBy(login);
+            this.NavigateToUserMenuBy(login);
         }
 
     }

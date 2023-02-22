@@ -66,14 +66,14 @@ public class BankingService
         {
             bank.Id = this.GenerateBankId(bank.Name);
 
-            if(!string.IsNullOrEmpty(bank.Id) && !string.IsNullOrEmpty(bank.Name) && !string.IsNullOrEmpty(bank.CreatedBy))
+            if (!string.IsNullOrEmpty(bank.Id) && !string.IsNullOrEmpty(bank.Name) && !string.IsNullOrEmpty(bank.CreatedBy))
             {
                 GlobalData.Banks.Add(bank);
             }
         }
-        catch(Exception e)
+        catch (Exception e)
         {
-            
+
         }
 
         return bank;
@@ -82,18 +82,20 @@ public class BankingService
     public APIResponse AddBankEmployee(Employee employee)
     {
         APIResponse apiResponse = new APIResponse();
+
         try
         {
             GlobalData.Employees.Add(employee);
-            apiResponse = Utility.SetApiMessage(true, $"Successfully added the employee.The employee Id is {employee.Id}");                    
+            apiResponse = Utility.SetApiMessage(true, $"Successfully added the employee.The employee Id is {employee.Id}");
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             apiResponse = Utility.SetApiMessage(false, "Unsuccessful opeartion.Some error occured");
         }
+
         return apiResponse;
     }
-    
+
     public APIResponse CreateAccount(AccountHolder AccountHolder)
     {
         APIResponse apiResponse = new APIResponse();
@@ -101,25 +103,25 @@ public class BankingService
         {
             AccountHolder.Id = AccountService.GenerateAccountId(AccountHolder.Name);
             GlobalData.AccountHolders.Add(AccountHolder);
-            Utility.SetApiMessage(true, "Successfully created the account");
+            apiResponse = Utility.SetApiMessage(true, "Successfully created the account");
         }
         catch (Exception e)
         {
-            Utility.SetApiMessage(false, "Some error occured during creation please try again");
+            apiResponse = Utility.SetApiMessage(false, "Some error occured during creation please try again");
             //Log exception
         }
 
         return apiResponse;
     }
 
-    public APIResponse UpdateAccount(string id , Dictionary<string,object> updatedDetails)
+    public APIResponse UpdateAccount(string id, Dictionary<string, object> updatedDetails)
     {
         APIResponse apiResponse = new APIResponse();
         try
         {
             List<AccountHolder> accountHolders = (from account in GlobalData.AccountHolders where account.Id == id select account).ToList<AccountHolder>();
 
-            if (accountHolders.Count() >= 0)
+            if (accountHolders.Count() == 0)
                 apiResponse = Utility.SetApiMessage(false, "Please check the id ");
             else
             {
@@ -134,7 +136,7 @@ public class BankingService
         }
 
         return apiResponse;
-        
+
     }
 
     public APIResponse DeleteAccount(string id)
@@ -160,29 +162,29 @@ public class BankingService
         {
             apiResponse = Utility.SetApiMessage(false, "Some error please try again");
         }
-        
+
         return apiResponse;
     }
 
-    public List<Transaction> ShowTransactionHistory( string id, string bankId)
+    public List<Transaction> GetTransactionHistory(string id, string bankId)
     {
-        int x,y;
+        int startIndex, endIndex;
         List<Transaction> userTranasactions = new List<Transaction>();
         try
         {
             foreach (Transaction transaction in GlobalData.Transactions)
             {
-                y = transaction.Id.IndexOf('/', x = transaction.Id.IndexOf('/') + 1);
-                string retrivedBankId = transaction.Id.Substring(x, y - x);
+                endIndex = transaction.Id.IndexOf('/', startIndex = transaction.Id.IndexOf('/') + 1);
+                string retrivedBankId = transaction.Id.Substring(startIndex, endIndex - startIndex);
 
-                y = transaction.Id.IndexOf('/', x = transaction.Id.IndexOf('/', transaction.Id.IndexOf('/') + 1) + 1);
-                string accountId = transaction.Id.Substring(x, y - x);
+                endIndex = transaction.Id.IndexOf('/', startIndex = transaction.Id.IndexOf('/', transaction.Id.IndexOf('/') + 1) + 1);
+                string accountId = transaction.Id.Substring(startIndex, endIndex - startIndex);
 
                 if (this.IsAnyTransaction(transaction, id, bankId, retrivedBankId, accountId))
                     userTranasactions.Add(transaction);
             }
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             new List<Transaction>();
         }
@@ -190,7 +192,7 @@ public class BankingService
         return userTranasactions;
     }
 
-    public APIResponse RevertTransaction(string transId,string accountId)
+    public APIResponse RevertTransaction(string transId, string accountId)
     {
         APIResponse apiResponse = new APIResponse();
         try
@@ -200,15 +202,15 @@ public class BankingService
             {
                 return Utility.SetApiMessage(false, "Revert is unsucessful please check the id");
             }
-            else if(transactions.Count == 1)
+            else if (transactions.Count == 1)
             {
                 if (transactions.First().SrcAccountId != accountId)
                     return Utility.SetApiMessage(false, "No transaction found check the id");
             }
-            apiResponse = RevertTheMoney(transactions.First(), transId);
-            if(!apiResponse.IsSuccess && !string.IsNullOrEmpty(transactions.First().DstAccountId))
-                apiResponse = RevertTheMoney(transactions.Last(), transId);
-            }
+            apiResponse = RevertTheAmount(transactions.First(), transId);
+            if (!apiResponse.IsSuccess && !string.IsNullOrEmpty(transactions.First().DstAccountId))
+                apiResponse = RevertTheAmount(transactions.Last(), transId);
+        }
         catch
         {
             apiResponse = Utility.SetApiMessage(false, "Some error occured please try again");
@@ -234,7 +236,7 @@ public class BankingService
         return apiResponse;
     }
 
-    public APIResponse RevertTheMoney(Transaction transaction, string transId)
+    public APIResponse RevertTheAmount(Transaction transaction, string transId)
     {
         AccountHolder senderAccount = this.AccountHolderService.GetAccountHolder(transaction.SrcAccountId);
         AccountHolder receiverAccount = this.AccountHolderService.GetAccountHolder(transaction.DstAccountId);
@@ -243,8 +245,8 @@ public class BankingService
         {
             receiverAccount.Balance -= transaction.Amount;
             senderAccount.Balance += transaction.Amount;
-            APIResponse apiResponse  = this.DeleteTransactinon(transId);
-            if(apiResponse.IsSuccess)
+            APIResponse apiResponse = this.DeleteTransactinon(transId);
+            if (apiResponse.IsSuccess)
                 return Utility.SetApiMessage(true, "Revert is succesfull");
             return Utility.SetApiMessage(false, "Revert is Unsuccessfull");
         }
@@ -253,12 +255,12 @@ public class BankingService
             if (transaction.Type)
                 senderAccount.Balance -= transaction.Amount;
             else
-               senderAccount.Balance += transaction.Amount;
+                senderAccount.Balance += transaction.Amount;
 
             APIResponse apiResponse = this.DeleteTransactinon(transId);
             return Utility.SetApiMessage(true, "Revert is successfull");
         }
-        return Utility.SetApiMessage(true, "Revert is unsuccessful");
+        return Utility.SetApiMessage(false, "Revert is unsuccessful");
     }
 
     public APIResponse checkIfValidIdsOrNot(string? bankId, string? accountId)
@@ -341,7 +343,7 @@ public class BankingService
         }
     }
 
-    public static Bank GetBankDetails(string? id)
+    public static Bank GetBankDetail(string? id)
     {
         try
         {
@@ -351,9 +353,27 @@ public class BankingService
 
             return newId.First();
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             return new Bank();
         }
+    }
+
+
+    public AccountHolder GetAccountHolder(LoginRequest login)
+    {
+        string curId = Utility.GetInputString("Enter your accountId", true);
+        if (curId == null)
+            return new AccountHolder();
+        string empBankId = GetBankId(login.UserId);
+
+        AccountHolder accountHolder = AccountHolderService.GetAccountHolder(curId);
+        if (accountHolder == null || string.IsNullOrEmpty(accountHolder.BankId) || accountHolder.BankId != empBankId)
+        {
+            WriteLine("No account found check the Id");
+            return new AccountHolder();
+        }
+
+        return accountHolder;
     }
 }

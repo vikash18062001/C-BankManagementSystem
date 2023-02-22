@@ -128,7 +128,7 @@ public class AccountHolderMenu
 
         WriteLine("\t\tTransactionId\t\t\t\t\t\tSrcAccountId\t\tDstAccountId\t\tCreatedBy\t\tCreatedOn\t\tAmount\t\tAction\t\t");
 
-        List<Transaction> userTransaction = AccountHolderService.ShowTransactionHistory(accountHolder.Id, accountHolder.BankId);
+        List<Transaction> userTransaction = AccountHolderService.GetTransactionHistory(accountHolder.Id, accountHolder.BankId);
         if(userTransaction.Count() != 0)
             ShowAllTransaction(userTransaction);
         else
