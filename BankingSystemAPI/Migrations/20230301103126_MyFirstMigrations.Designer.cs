@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BankingSystemAPI.Migrations
 {
     [DbContext(typeof(BankingDbContext))]
-    [Migration("20230228175046_MyFirstMigration")]
-    partial class MyFirstMigration
+    [Migration("20230301103126_MyFirstMigrations")]
+    partial class MyFirstMigrations
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -70,7 +70,7 @@ namespace BankingSystemAPI.Migrations
                     b.ToTable("AccountHolders");
                 });
 
-            modelBuilder.Entity("Bank", b =>
+            modelBuilder.Entity("BankModel", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");

@@ -2,28 +2,15 @@
 using static System.Console;
 using System;
 using System.Net.Http.Json;
-using BankingSystem.Services;
 using BankingSystemAPI.Models;
-//using BankingSystem.BankingSystemAPI.Models;
 using BankingSystem.Models;
-using System.Text.Json.Serialization;
-//using BankingSystemAPI.Models;
-using System.Text.Json;
-using System.Text.Json.Serialization;
+using Microsoft.Data.SqlClient;
+using BankingSystem.Services;
+using System.Data;
 
 public class BankingService
 {
     AccountHolderService AccountHolderService = new AccountHolderService();
-
-    private readonly BankingDbContext _context = new BankingDbContext();
-
-    //public BankingService()
-    //{
-    //}
-    //public BankingService(BankingDbContext context)
-    //{
-    //    this._context = context;
-    //}
 
     public APIResponse Deposit(Transaction transaction)
     {
@@ -35,7 +22,15 @@ public class BankingService
             {
                 accountHolder.Balance += transaction.Amount;
                 apiResponse = AccountHolderService.UpdateAccountHolderAfterDeposit(accountHolder);
-                GlobalData.Transactions.Add(transaction);
+                //GlobalData.Transactions.Add(transaction);
+                using (SqlConnection conn = new SqlConnection(Constants.ConnectionString))
+                {
+                    SqlCommand cmd = new SqlCommand($"INSERT INTO Transactions  VALUES ('{transaction.Id}','{transaction.SrcAccountId}','{transaction.DstAccountId}','{transaction.Amount}','{transaction.Type}','{transaction.CreatedOn}','{transaction.CreatedBy}')", conn);
+
+                    conn.Open();
+
+                    cmd.ExecuteNonQuery();
+                }
             }
             else
             {
@@ -64,7 +59,15 @@ public class BankingService
                 }
                 accountHolder.Balance -= transaction.Amount;
                 apiResponse = this.AccountHolderService.UpdateAccountHolderAfterWithdraw(accountHolder);
-                GlobalData.Transactions.Add(transaction);
+                //GlobalData.Transactions.Add(transaction);
+                using (SqlConnection conn = new SqlConnection(Constants.ConnectionString))
+                {
+                    SqlCommand cmd = new SqlCommand($"INSERT INTO Transactions  VALUES ('{transaction.Id}','{transaction.SrcAccountId}','{transaction.DstAccountId}','{transaction.Amount}','{transaction.Type}','{transaction.CreatedOn}','{transaction.CreatedBy}')", conn);
+
+                    conn.Open();
+
+                    cmd.ExecuteNonQuery();
+                }
             }
             else
             {
@@ -82,29 +85,23 @@ public class BankingService
 
     public Bank CreateBank(Bank bank)
     {
-        APIServices<Bank> apiService = new APIServices<Bank>();
         try
         {
             bank.Id = this.GenerateBankId(bank.Name);
-            BankModel bank2 = new BankModel(){
-                Id = "visadkfaslflsajflsja",
-                Name = "Vikash",
-                RTGSDiff = 0,
-                RTGSSame = 0,
-                CreatedBy = "asdf",
-                CreatedOn = new DateTime(),
-                IMPSDiff = 0,
-                IMPSSame = 0
-            };
-            //string bankString = JsonSerializer.Serialize(bank2);
-            //BankModel bank1 = JsonSerializer.Deserialize<BankModel>(bankString);
 
             if (!string.IsNullOrEmpty(bank.Id) && !string.IsNullOrEmpty(bank.Name) && !string.IsNullOrEmpty(bank.CreatedBy))
             {
-                //apiService.Post("bankCreation", bank); // making the post request for bank creation
-                WriteLine(_context);
-                _context.Banks.Add(bank2);
-                _context.SaveChanges();
+                using (SqlConnection conn = new SqlConnection(Constants.ConnectionString))
+                {
+                    DateTime time =  DateTime.Now;
+
+                    SqlCommand cmd = new SqlCommand($"INSERT INTO banks (Id,Name,RTGSSame,RTGSDiff,IMPSSame,IMPSDiff,CreatedBy,CreatedOn) VALUES ('{bank.Id}','{bank.Name}','{bank.RTGSSame}','{bank.RTGSDiff}','{bank.IMPSSame}','{bank.IMPSDiff}','{bank.CreatedBy}','{time}')", conn);
+
+                    conn.Open();
+
+                    cmd.ExecuteNonQuery();
+
+                }
             }
         }
         catch (Exception e)
@@ -112,19 +109,24 @@ public class BankingService
             Console.Write(e);
             return bank;
         }
-
+        
         return bank;
     }
 
     public APIResponse AddBankEmployee(Employee employee)
     {
         APIResponse apiResponse = new APIResponse();
-        APIServices<Employee> apiService = new APIServices<Employee>();
         try
         {
-            //var response = apiService.Post("employeeCreation", employee);
-            
+            using (SqlConnection conn = new SqlConnection(Constants.ConnectionString))
+            {
+                SqlCommand cmd = new SqlCommand($"INSERT INTO employees VALUES ('{employee.Id}','{employee.Salary}','{employee.BankId}','{employee.Name}','{employee.Password}','{employee.Type}','{employee.Email}','{employee.Mobile}','{employee.CreatedBy}','{employee.CreatedOn}')", conn);
 
+                conn.Open();
+
+                cmd.ExecuteNonQuery();
+
+            }
             apiResponse = Utility.SetApiMessage(true, $"Successfully added the employee.The employee Id is {employee.Id}");
         }
         catch (Exception e)
@@ -138,12 +140,20 @@ public class BankingService
     public APIResponse CreateAccount(AccountHolder AccountHolder)
     {
         APIResponse apiResponse = new APIResponse();
-        APIServices<AccountHolder> apiService = new APIServices<AccountHolder>();
+
         try
         {
             AccountHolder.Id = AccountService.GenerateAccountId(AccountHolder.Name);
-            //GlobalData.AccountHolders.Add(AccountHolder);
-            apiService.Post("accountCreation",AccountHolder);
+
+            using (SqlConnection conn = new SqlConnection(Constants.ConnectionString))
+            {
+                SqlCommand cmd = new SqlCommand($"INSERT INTO accountHolders VALUES ('{AccountHolder.Id}','{AccountHolder.BankId}','{AccountHolder.Balance}','{AccountHolder.Name}','{AccountHolder.Password}','{AccountHolder.Type}','{AccountHolder.Email}','{AccountHolder.Mobile}','{AccountHolder.CreatedBy}','{AccountHolder.CreatedOn}')", conn);
+
+                conn.Open();
+
+                cmd.ExecuteNonQuery();
+
+            }
 
             apiResponse = Utility.SetApiMessage(true, "Successfully created the account");
         }
@@ -161,14 +171,24 @@ public class BankingService
         APIResponse apiResponse = new APIResponse();
         try
         {
-            List<AccountHolder> accountHolders = (from account in GlobalData.AccountHolders where account.Id == id select account).ToList<AccountHolder>();
+            //List<AccountHolder> accountHolders = (from account in GlobalData.AccountHolders where account.Id == id select account).ToList<AccountHolder>();
 
-            if (accountHolders.Count() == 0)
-                apiResponse = Utility.SetApiMessage(false, "Please check the id ");
-            else
+            //if (accountHolders.Count() == 0)
+            //    apiResponse = Utility.SetApiMessage(false, "Please check the id ");
+            //else
+            //{
+            //    accountHolders.First().Email = updatedDetails["Email"].ToString()!;
+            //    accountHolders.First().Mobile = updatedDetails["Mobile"].ToString()!;
+            //    apiResponse = Utility.SetApiMessage(true, "Updation is successful");
+            //}
+            using (SqlConnection conn = new SqlConnection(Constants.ConnectionString)) // initialize the api response in case of no accoutn  holder
             {
-                accountHolders.First().Email = updatedDetails["Email"].ToString()!;
-                accountHolders.First().Mobile = updatedDetails["Mobile"].ToString()!;
+                SqlCommand cmd = new SqlCommand($"Update accountHolderes SET Email='{updatedDetails["Email"].ToString()}' ,Mobile = '{updatedDetails["Mobile"].ToString()}' where Id = '{id}'", conn);
+
+                conn.Open();
+
+                cmd.ExecuteNonQuery();
+
                 apiResponse = Utility.SetApiMessage(true, "Updation is successful");
             }
         }
@@ -186,15 +206,26 @@ public class BankingService
         APIResponse apiResponse = new APIResponse();
         try
         {
-            GlobalData.AccountHolders.RemoveAll(r =>
+            using (SqlConnection conn = new SqlConnection(Constants.ConnectionString))
             {
-                if (r.Id == id)
-                {
-                    apiResponse = Utility.SetApiMessage(true, "Successful deletion");
-                    return true;
-                }
-                return false;
-            });
+                SqlCommand cmd = new SqlCommand($"Delete From accountHolderes where Id = '{id}'", conn);
+
+                conn.Open();
+
+                cmd.ExecuteNonQuery();
+
+                apiResponse = Utility.SetApiMessage(true, "Successful deletion");
+                
+            }
+            //GlobalData.AccountHolders.RemoveAll(r =>
+            //{
+            //    if (r.Id == id)
+            //    {
+            //        apiResponse = Utility.SetApiMessage(true, "Successful deletion");
+            //        return true;
+            //    }
+            //    return false;
+            //});
             if (apiResponse.IsSuccess)
                 apiResponse = DeleteTransactinon(id);
             else
@@ -239,7 +270,24 @@ public class BankingService
         APIResponse apiResponse = new APIResponse();
         try
         {
-            List<Transaction> transactions = (from trans in GlobalData.Transactions where trans.Id == transId select trans).ToList<Transaction>();
+            List<Transaction> transactions = new List<Transaction>();
+            using (SqlConnection conn = new SqlConnection(Constants.ConnectionString))
+            {
+                SqlCommand cmd = new SqlCommand($"Select * From Transaction where Id = '{transId}'", conn);
+
+                conn.Open();
+
+                SqlDataReader reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    transactions.Add((Transaction)reader);
+                }              
+
+                apiResponse = Utility.SetApiMessage(true, "Successful deletion");
+
+            }
+
+            //List<Transaction> transactions = (from trans in GlobalData.Transactions where trans.Id == transId select trans).ToList<Transaction>();
             if (transactions.Count() == 0)
             {
                 return Utility.SetApiMessage(false, "Revert is unsucessful please check the id");
@@ -267,8 +315,21 @@ public class BankingService
         APIResponse apiResponse = new APIResponse();
         try
         {
-            GlobalData.Transactions.RemoveAll(r => (r.Id == transId));
-            apiResponse = Utility.SetApiMessage(true, "Successful Deletion");
+            using (SqlConnection conn = new SqlConnection(Constants.ConnectionString))
+            {
+                SqlCommand cmd = new SqlCommand($"Delete From Transactinons where Id = '{transId}'", conn);
+
+                conn.Open();
+
+                cmd.ExecuteNonQuery();
+
+                apiResponse = Utility.SetApiMessage(true, "Successful deletion");
+
+            }
+
+            //GlobalData.Transactions.RemoveAll(r => (r.Id == transId));
+
+            //apiResponse = Utility.SetApiMessage(true, "Successful Deletion");
         }
         catch
         {
@@ -388,6 +449,20 @@ public class BankingService
     {
         try
         {
+            //using (SqlConnection conn = new SqlConnection(Constants.ConnectionString))
+            //{
+            //    //SqlCommand cmd = new SqlCommand($"Select * from Banks where Id ='{id}'",conn);
+
+            //    SqlDataAdapter ad = new SqlDataAdapter($"Select * from Banks where Id ='{id}'", conn);
+            //    DataSet ds = new DataSet();
+            //    //ds.Fill()
+            //    ad.Fill(ds);
+            //    DataTable products = ds.Tables["Banks"];
+
+
+
+
+            //}
             List<Bank> newId = (from bank in GlobalData.Banks where bank.Id == id select bank).ToList<Bank>();
             if (newId.Count == 0)
                 return new Bank();

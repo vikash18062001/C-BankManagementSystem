@@ -1,27 +1,33 @@
 ﻿<Properties StartupConfiguration="Multiple Projects">
   <MonoDevelop.Ide.Workbench ActiveDocument="BankingSystem/Services/BankingService.cs">
     <Files>
-      <File FileName="BankingSystem/BankStaff.cs" />
-      <File FileName="BankingSystem/Services/BankingService.cs" Line="92" Column="1" />
-      <File FileName="BankingSystemAPI/Models/Employee.cs" Line="13" Column="1" />
-      <File FileName="BankingSystemAPI/Models/User.cs" Line="4" Column="14" />
-      <File FileName="BankingSystem/Services/GlobalDataService.cs" />
-      <File FileName="BankingSystem/Services/AccountService.cs" />
-      <File FileName="BankingSystem/Services/APIServices.cs" />
-      <File FileName="BankingSystemAPI/Controllers/BankingControllerApi.cs" />
-      <File FileName="BankingSystemAPI/Program.cs" />
-      <File FileName="BankingSystemAPI/appsettings.json" Line="1" Column="1" />
-      <File FileName="BankingSystemAPI/Models/Transaction.cs" Line="25" Column="1" />
-      <File FileName="BankingSystemAPI/Models/AccountHolder.cs" Line="1" Column="1" />
-      <File FileName="BankingSystem/Models/Bank.cs" Line="16" Column="18" />
-      <File FileName="BankingSystemAPI/Models/Bank.cs" Line="23" Column="1" />
+      <File FileName="BankingSystem/BankStaff.cs" Line="1" Column="1" />
+      <File FileName="BankingSystemAPI/Models/Employee.cs" />
+      <File FileName="BankingSystemAPI/Models/User.cs" />
+      <File FileName="BankingSystem/Services/GlobalDataService.cs" Line="1" Column="1" />
+      <File FileName="BankingSystemAPI/appsettings.json" Line="10" Column="32" />
+      <File FileName="BankingSystemAPI/Models/Transaction.cs" />
+      <File FileName="BankingSystemAPI/Models/AccountHolder.cs" />
+      <File FileName="BankingSystem/Models/Bank.cs" />
+      <File FileName="BankingSystem/BankApplication.cs" Line="54" Column="38" />
+      <File FileName="BankingSystemAPI/Models/Bank.cs" />
+      <File FileName="BankingSystemAPI/Program.cs" Line="14" Column="27" />
+      <File FileName="BankingSystemAPI/Models/BankingDbContext.cs" Line="23" Column="1" />
+      <File FileName="BankingSystemAPI/appsettings.Development.json" Line="1" Column="1" />
+      <File FileName="BankingSystem/Models/Constants.cs" Line="6" Column="74" />
+      <File FileName="BankingSystem/AccountHolderMenu.cs" Line="75" Column="53" />
+      <File FileName="BankingSystem/Utility.cs" Line="1" Column="1" />
+      <File FileName="BankingSystem/Services/DatabaseServices.cs" Line="22" Column="1" />
+      <File FileName="BankingSystem/Services/BankingService.cs" Line="93" Column="157" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">
         <State name="__root__">
           <Node name="BankingSystem" expanded="True">
             <Node name="BankingSystem" expanded="True">
-              <Node name="Models" expanded="True" />
+              <Node name="Models" expanded="True">
+                <Node name="Common" expanded="True" />
+              </Node>
               <Node name="Services" expanded="True">
                 <Node name="BankingService.cs" selected="True" />
               </Node>
@@ -29,30 +35,27 @@
             <Node name="BankingSystemAPI" expanded="True">
               <Node name="Controllers" expanded="True" />
               <Node name="Models" expanded="True" />
+              <Node name="appsettings.json" expanded="True" />
             </Node>
           </Node>
         </State>
       </Pad>
     </Pads>
   </MonoDevelop.Ide.Workbench>
-  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
-  <MonoDevelop.Ide.ItemProperties.BankingSystem PreferredExecutionTarget="MonoDevelop.Default" />
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
   <MonoDevelop.Ide.ItemProperties.BankingSystemAPI PreferredExecutionTarget="/Applications/Google Chrome.app" />
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore>
       <Breakpoint file="/Users/vikash/Projects/BankingSystem/BankingSystemAPI/Controllers/BankingControllerApi.cs" relfile="BankingSystemAPI/Controllers/BankingControllerApi.cs" line="34" column="1" />
-      <Breakpoint file="/Users/vikash/Projects/BankingSystem/BankingSystemAPI/Controllers/BankingControllerApi.cs" relfile="BankingSystemAPI/Controllers/BankingControllerApi.cs" line="21" column="1" />
-      <Breakpoint file="/Users/vikash/Projects/BankingSystem/BankingSystemAPI/Controllers/BankingControllerApi.cs" relfile="BankingSystemAPI/Controllers/BankingControllerApi.cs" line="47" column="1" />
       <Breakpoint file="/Users/vikash/Projects/BankingSystem/BankingSystem/Services/APIServices.cs" relfile="BankingSystem/Services/APIServices.cs" line="13" column="1" />
       <Breakpoint file="/Users/vikash/Projects/BankingSystem/BankingSystem/Services/APIServices.cs" relfile="BankingSystem/Services/APIServices.cs" line="10" column="1" />
       <Breakpoint file="/Users/vikash/Projects/BankingSystem/BankingSystem/Services/APIServices.cs" relfile="BankingSystem/Services/APIServices.cs" line="16" column="1" />
       <Breakpoint file="/Users/vikash/Projects/BankingSystem/BankingSystem/Services/APIServices.cs" relfile="BankingSystem/Services/APIServices.cs" line="18" column="1" />
-      <Breakpoint file="/Users/vikash/Projects/BankingSystem/BankingSystem/Services/BankingService.cs" relfile="BankingSystem/Services/BankingService.cs" line="80" column="1" />
-      <Breakpoint file="/Users/vikash/Projects/BankingSystem/BankingSystem/Services/BankingService.cs" relfile="BankingSystem/Services/BankingService.cs" line="92" column="1" />
-      <Breakpoint file="/Users/vikash/Projects/BankingSystem/BankingSystem/Services/BankingService.cs" relfile="BankingSystem/Services/BankingService.cs" line="82" column="1" />
+      <Breakpoint file="/Users/vikash/Projects/BankingSystem/BankingSystem/Services/DatabaseServices.cs" relfile="BankingSystem/Services/DatabaseServices.cs" line="15" column="1" />
+      <Breakpoint file="/Users/vikash/Projects/BankingSystem/BankingSystem/Services/BankingService.cs" relfile="BankingSystem/Services/BankingService.cs" line="102" column="1" />
+      <Breakpoint file="/Users/vikash/Projects/BankingSystem/BankingSystem/Program.cs" relfile="BankingSystem/Program.cs" line="20" column="1" />
     </BreakpointStore>
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
   <MultiItemStartupConfigurations>
     <MultiItemSolutionRunConfiguration Id="Multiple Projects" Name="Multiple Projects">
       <Items>
@@ -61,4 +64,6 @@
       </Items>
     </MultiItemSolutionRunConfiguration>
   </MultiItemStartupConfigurations>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MonoDevelop.Ide.ItemProperties.BankingSystem PreferredExecutionTarget="MonoDevelop.Default" />
 </Properties>

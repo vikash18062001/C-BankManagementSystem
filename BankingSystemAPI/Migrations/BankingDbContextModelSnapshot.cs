@@ -67,7 +67,7 @@ namespace BankingSystemAPI.Migrations
                     b.ToTable("AccountHolders");
                 });
 
-            modelBuilder.Entity("Bank", b =>
+            modelBuilder.Entity("BankModel", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
