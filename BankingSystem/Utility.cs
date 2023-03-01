@@ -34,7 +34,7 @@ public static class Utility
 
         try
         {
-            input = ReadLine();
+            input = ReadLine().Trim();
             if((isRequired && string.IsNullOrEmpty(input)) || input.Length<3)
             {
                 WriteLine("Enter valid input");
@@ -47,7 +47,7 @@ public static class Utility
             return GetInputString(helpText, isRequired);
         }
 
-        return input.Trim();
+        return input;
     }
 
     public static string GetInputEmail(string helpText,bool isRequired)
@@ -56,10 +56,10 @@ public static class Utility
         WriteLine(helpText);
         try
         {
-            input = ReadLine();
+            input = ReadLine().Trim();
             if((isRequired && !string.IsNullOrEmpty(input)) && IsValidEmail(input))
             {
-                return input.Trim();
+                return input;
             }
             return GetInputEmail(helpText, isRequired);
         }
@@ -76,9 +76,9 @@ public static class Utility
         WriteLine(helpText);
         try
         {
-            input = ReadLine();
+            input = ReadLine().Trim();
             if ((isRequired && !string.IsNullOrEmpty(input)) && IsValidMobileNo(input))
-                return input.Trim();
+                return input;
             return GetInputMobileNo(helpText, isRequired);
 
         }
@@ -95,7 +95,7 @@ public static class Utility
         WriteLine(helpText);
         try
         {
-            input = ReadLine();
+            input = ReadLine().Trim();
             if(isRequired && string.IsNullOrEmpty(input))
             {
                 WriteLine("Enter valid password");
@@ -112,7 +112,7 @@ public static class Utility
             WriteLine("Enter valid password");
             return GetPassword(helpText, isRequired);
         }
-        return input.Trim();
+        return input;
     }
 
     public static double GetInputServiceCharge(string helpText )

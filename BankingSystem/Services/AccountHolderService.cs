@@ -2,7 +2,7 @@
 using static System.Console;
 
 public class AccountHolderService
-{ 
+{
     public List<Transaction> GetTransactionHistory(string id, string bankId)
     {
         BankingService bankingService = new BankingService();
@@ -12,7 +12,7 @@ public class AccountHolderService
         return userTransaction;
     }
 
-    public Transaction TransactionInfo(AccountHolder accountHolder , string receiverAccountId,double transactionAmount)
+    public Transaction TransactionInfo(AccountHolder accountHolder, string receiverAccountId, double transactionAmount)
     {
         try
         {
@@ -47,7 +47,7 @@ public class AccountHolderService
         {
             //log
         }
-        
+
         return null;
     }
 
@@ -166,8 +166,8 @@ public class AccountHolderService
 
             Transaction transaction = WithDrawMoneyFromSender(transferFund);
 
-            if(transaction != null && !string.IsNullOrEmpty(transaction.Id))
-                return DepositMoneyToReceiver(transferFund,transaction); 
+            if (transaction != null && !string.IsNullOrEmpty(transaction.Id))
+                return DepositMoneyToReceiver(transferFund, transaction);
 
             return Utility.SetApiMessage(false, "Transfer is Unsuccesful check id");
         }
@@ -176,12 +176,12 @@ public class AccountHolderService
         return Utility.SetApiMessage(false, "Transfer is unsuccesful check id");
     }
 
-    public APIResponse DepositMoneyToReceiver(TransferFund transferFund , Transaction transaction)
+    public APIResponse DepositMoneyToReceiver(TransferFund transferFund, Transaction transaction)
     {
         APIResponse apiResponse = new APIResponse();
         try
         {
-            Transaction newTransaction = TransactionInfo(transferFund.SrcAccountHolder, transferFund.DstAccountHolder.Id,transferFund.OriginalAmount); // have to create new transaction because previous one is getting changed for both of them ads it is call by reference.
+            Transaction newTransaction = TransactionInfo(transferFund.SrcAccountHolder, transferFund.DstAccountHolder.Id, transferFund.OriginalAmount); // have to create new transaction because previous one is getting changed for both of them ads it is call by reference.
             newTransaction.Id = transaction.Id;
             newTransaction.Type = true;
             transferFund.DstAccountHolder.Balance += transferFund.OriginalAmount;
@@ -202,7 +202,7 @@ public class AccountHolderService
     {
         try
         {
-            Transaction transaction = TransactionInfo(transfer.SrcAccountHolder, transfer.DstAccountHolder.Id, transfer.NewAmount); // have to create new transaction because previous one is getting changed for both of them ads it is call by reference.
+            Transaction transaction = TransactionInfo(transfer.SrcAccountHolder, transfer.DstAccountHolder.Id, transfer.NewAmount);
             transaction.Type = false;
             transaction.Amount = transfer.NewAmount;
             return transaction;

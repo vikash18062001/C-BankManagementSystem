@@ -1,4 +1,4 @@
-﻿using static System.Console;
+﻿ using static System.Console;
 
 public class AccountHolderMenu
 {
@@ -90,7 +90,6 @@ public class AccountHolderMenu
 
         APIResponse apiResponse = BankingService.WithDraw(transaction);
         WriteLine(apiResponse.Message);
-
     }
 
     private void TransferFunds(AccountHolder currentAccountHolder)
@@ -129,13 +128,10 @@ public class AccountHolderMenu
         WriteLine("\t\tTransactionId\t\t\t\t\t\tSrcAccountId\t\tDstAccountId\t\tCreatedBy\t\tCreatedOn\t\tAmount\t\tAction\t\t");
 
         List<Transaction> userTransaction = AccountHolderService.GetTransactionHistory(accountHolder.Id, accountHolder.BankId);
-        if(userTransaction.Count() != 0)
+        if (userTransaction.Count() != 0)
             ShowAllTransaction(userTransaction);
         else
-        {
             WriteLine("No transaction found");
-        }
-
     }
 
     public void ShowAllTransaction(List<Transaction> userTransactions)

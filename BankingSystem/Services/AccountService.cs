@@ -2,22 +2,28 @@
 {
     public static bool IsAuthenticated(LoginRequest login, string type)
     {
-        if (type == Enums.LoginTypes.Employee.ToString())
+        try
         {
-            var data = GlobalData.Employees.Where(obj => (obj.Id == login.UserId) && (obj.Password == login.Password)).Any();
-            if (data)
-                return data;
+            if (type == Enums.LoginTypes.Employee.ToString())
+            {
+                var data = GlobalData.Employees.Where(obj => (obj.Id == login.UserId) && (obj.Password == login.Password)).Any();
+                if (data)
+                    return data;
 
-            return false;
+                return false;
+            }
+            else if (type == Enums.LoginTypes.Accountholder.ToString())
+            {
+                var data = GlobalData.AccountHolders.Where(obj => (obj.Id == login.UserId) && (obj.Password == login.Password)).Any();
+                if (data)
+                    return data;
 
+                return false;
+            }
         }
-        else if (type == Enums.LoginTypes.Accountholder.ToString())
+        catch(Exception e)
         {
-            var data = GlobalData.AccountHolders.Where(obj => (obj.Id == login.UserId) && (obj.Password == login.Password)).Any();
-            if (data)
-                return data;
 
-            return false;
         }
 
         return false;

@@ -98,7 +98,7 @@ public class BankingStaff
 
     private void UpdateAccount(LoginRequest login)
     {
-        AccountHolder accountHolder = BankingService.GetAccountHolder(login);
+        AccountHolder accountHolder = this.GetAccountHolder(login);
         if (string.IsNullOrEmpty(accountHolder.Id))
             return;
 
@@ -117,7 +117,7 @@ public class BankingStaff
 
     private void DeleteAccount(LoginRequest login)
     {
-        AccountHolder accountHolder = BankingService.GetAccountHolder(login);
+        AccountHolder accountHolder = this.GetAccountHolder(login);
         if (string.IsNullOrEmpty(accountHolder.Id))
             return;
 
@@ -151,7 +151,7 @@ public class BankingStaff
 
     private void ShowTransactionHistory(LoginRequest login)
     {
-        AccountHolder accountHolder = BankingService.GetAccountHolder(login);
+        AccountHolder accountHolder = this.GetAccountHolder(login);
         if (string.IsNullOrEmpty(accountHolder.Id))
             return;
 
@@ -200,6 +200,25 @@ public class BankingStaff
             bank.RTGSDiff = Convert.ToDouble(Utility.GetInputServiceCharge("Enter serive charge for RTGS in percent "));
             bank.IMPSDiff = Convert.ToDouble(Utility.GetInputServiceCharge("Enter serive charge for IMPS in percent "));
         }
+    }
+
+
+
+    public AccountHolder GetAccountHolder(LoginRequest login)
+    {
+        string curId = Utility.GetInputString("Enter your accountId", true);
+        if (curId == null)
+            return new AccountHolder();
+        string empBankId = BankingService.GetBankId(login.UserId);
+
+        AccountHolder accountHolder = AccountHolderService.GetAccountHolder(curId);
+        if (accountHolder == null || string.IsNullOrEmpty(accountHolder.BankId) || accountHolder.BankId != empBankId)
+        {
+            WriteLine("No account found check the Id");
+            return new AccountHolder();
+        }
+
+        return accountHolder;
     }
 
 }

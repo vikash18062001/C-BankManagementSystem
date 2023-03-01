@@ -14,6 +14,7 @@ public class BankApplication
         WriteLine("****Banking Management System****\n\n1 : Create A Bank \n2 : Login\n3 : Exit");
 
         int option = Utility.GetIntInput("Choose a value from the menu", true);
+
         switch (option)
         {
             case 1:
@@ -53,9 +54,7 @@ public class BankApplication
         bank  = BankingService.CreateBank(bank);
 
         if (bank != null && string.IsNullOrEmpty(bank.Id))
-        {
             WriteLine("Bank creation is unsuccessful");
-        }
         else
         {
             this.AddEmployeeDetails(bank,employeeName,password);

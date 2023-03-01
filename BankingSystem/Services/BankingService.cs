@@ -1,9 +1,29 @@
 ﻿using System.Xml.Linq;
 using static System.Console;
+using System;
+using System.Net.Http.Json;
+using BankingSystem.Services;
+using BankingSystemAPI.Models;
+//using BankingSystem.BankingSystemAPI.Models;
+using BankingSystem.Models;
+using System.Text.Json.Serialization;
+//using BankingSystemAPI.Models;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 public class BankingService
 {
     AccountHolderService AccountHolderService = new AccountHolderService();
+
+    private readonly BankingDbContext _context = new BankingDbContext();
+
+    //public BankingService()
+    //{
+    //}
+    //public BankingService(BankingDbContext context)
+    //{
+    //    this._context = context;
+    //}
 
     public APIResponse Deposit(Transaction transaction)
     {
@@ -62,18 +82,35 @@ public class BankingService
 
     public Bank CreateBank(Bank bank)
     {
+        APIServices<Bank> apiService = new APIServices<Bank>();
         try
         {
             bank.Id = this.GenerateBankId(bank.Name);
+            BankModel bank2 = new BankModel(){
+                Id = "visadkfaslflsajflsja",
+                Name = "Vikash",
+                RTGSDiff = 0,
+                RTGSSame = 0,
+                CreatedBy = "asdf",
+                CreatedOn = new DateTime(),
+                IMPSDiff = 0,
+                IMPSSame = 0
+            };
+            //string bankString = JsonSerializer.Serialize(bank2);
+            //BankModel bank1 = JsonSerializer.Deserialize<BankModel>(bankString);
 
             if (!string.IsNullOrEmpty(bank.Id) && !string.IsNullOrEmpty(bank.Name) && !string.IsNullOrEmpty(bank.CreatedBy))
             {
-                GlobalData.Banks.Add(bank);
+                //apiService.Post("bankCreation", bank); // making the post request for bank creation
+                WriteLine(_context);
+                _context.Banks.Add(bank2);
+                _context.SaveChanges();
             }
         }
         catch (Exception e)
         {
-
+            Console.Write(e);
+            return bank;
         }
 
         return bank;
@@ -82,10 +119,12 @@ public class BankingService
     public APIResponse AddBankEmployee(Employee employee)
     {
         APIResponse apiResponse = new APIResponse();
-
+        APIServices<Employee> apiService = new APIServices<Employee>();
         try
         {
-            GlobalData.Employees.Add(employee);
+            //var response = apiService.Post("employeeCreation", employee);
+            
+
             apiResponse = Utility.SetApiMessage(true, $"Successfully added the employee.The employee Id is {employee.Id}");
         }
         catch (Exception e)
@@ -99,10 +138,13 @@ public class BankingService
     public APIResponse CreateAccount(AccountHolder AccountHolder)
     {
         APIResponse apiResponse = new APIResponse();
+        APIServices<AccountHolder> apiService = new APIServices<AccountHolder>();
         try
         {
             AccountHolder.Id = AccountService.GenerateAccountId(AccountHolder.Name);
-            GlobalData.AccountHolders.Add(AccountHolder);
+            //GlobalData.AccountHolders.Add(AccountHolder);
+            apiService.Post("accountCreation",AccountHolder);
+
             apiResponse = Utility.SetApiMessage(true, "Successfully created the account");
         }
         catch (Exception e)
@@ -319,8 +361,8 @@ public class BankingService
         {
             return true;
         }
-        return false;
 
+        return false;
     }
 
 
@@ -331,7 +373,6 @@ public class BankingService
             List<Employee> employee = (from emp in GlobalData.Employees where emp.Id == empId select emp).ToList<Employee>();
             if (employee.Count != 0)
             {
-
                 return employee.First().BankId;
             }
 
@@ -360,20 +401,4 @@ public class BankingService
     }
 
 
-    public AccountHolder GetAccountHolder(LoginRequest login)
-    {
-        string curId = Utility.GetInputString("Enter your accountId", true);
-        if (curId == null)
-            return new AccountHolder();
-        string empBankId = GetBankId(login.UserId);
-
-        AccountHolder accountHolder = AccountHolderService.GetAccountHolder(curId);
-        if (accountHolder == null || string.IsNullOrEmpty(accountHolder.BankId) || accountHolder.BankId != empBankId)
-        {
-            WriteLine("No account found check the Id");
-            return new AccountHolder();
-        }
-
-        return accountHolder;
-    }
 }
