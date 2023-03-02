@@ -1,4 +1,6 @@
-﻿public class Transaction
+﻿using System.ComponentModel.DataAnnotations;
+
+public class Transaction
 {
     public Transaction()
     {
@@ -11,6 +13,9 @@
 
         this.CreatedBy = string.Empty;
     }
+ 
+    [Key]
+    public Guid UniqueId { get; set; } // Id to find all the unique element
 
     public string Id { get; set; } // Transaction Id
 

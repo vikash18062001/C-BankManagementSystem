@@ -1,12 +1,16 @@
-﻿public static class AccountService
+﻿using BankingSystem.Models;
+
+public static class AccountService
 {
+    private static readonly BankingDbContext _context = new BankingDbContext();
+
     public static bool IsAuthenticated(LoginRequest login, string type)
     {
         try
         {
             if (type == Enums.LoginTypes.Employee.ToString())
             {
-                var data = GlobalData.Employees.Where(obj => (obj.Id == login.UserId) && (obj.Password == login.Password)).Any();
+                var data = _context.Employees.Where(obj => (obj.Id == login.UserId) && (obj.Password == login.Password)).Any();
                 if (data)
                     return data;
 
@@ -14,7 +18,7 @@
             }
             else if (type == Enums.LoginTypes.Accountholder.ToString())
             {
-                var data = GlobalData.AccountHolders.Where(obj => (obj.Id == login.UserId) && (obj.Password == login.Password)).Any();
+                var data = _context.AccountHolders.Where(obj => (obj.Id == login.UserId) && (obj.Password == login.Password)).Any();
                 if (data)
                     return data;
 
@@ -33,7 +37,7 @@
     {
         try
         {
-            List<Employee> employee = (from emp in GlobalData.Employees where emp.Id == empId select emp).ToList<Employee>();
+            List<Employee> employee = (from emp in _context.Employees where emp.Id == empId select emp).ToList<Employee>();
             if (employee.Count != 0)
             {
                 return employee.First().Name;

@@ -1,10 +1,11 @@
-﻿public partial class Program
+﻿using BankingSystem.Models;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+
+public partial class Program
 {
-    static void Main()
-    {
+    public static void Main()
+    { 
         new BankApplication().Initialize();
     }
 }
-
-
-

@@ -5,7 +5,7 @@
         this.BankId = string.Empty;
     }
 
-    public double Salary;
+    public double Salary { get; set; }
 
-    public string BankId;
+    public string BankId { get; set; }
 }

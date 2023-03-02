@@ -1,8 +1,12 @@
 ﻿using System.Reflection;
+using BankingSystem.Models;
 using static System.Console;
 
 public class AccountHolderService
 {
+
+    private static readonly BankingDbContext _context = new BankingDbContext();
+
     public List<Transaction> GetTransactionHistory(string id, string bankId)
     {
         BankingService bankingService = new BankingService();
@@ -24,6 +28,7 @@ public class AccountHolderService
                 DstAccountId = receiverAccountId,
                 CreatedOn = DateTime.Now,
                 Id = $"TXN/{accountHolder.BankId}/{accountHolder.Id}/{DateTime.Now.ToOADate()}",
+                UniqueId = new Guid()
             };
 
             return transaction;
@@ -38,9 +43,10 @@ public class AccountHolderService
     {
         try
         {
+            //check for null
             if (!string.IsNullOrEmpty(accountId))
             {
-                return GlobalData.AccountHolders.Find(accountHolder => accountHolder.Id == accountId);
+                return _context.AccountHolders.Where(accountHolder => accountHolder.Id == accountId).First();
             }
         }
         catch (Exception ex)
@@ -57,13 +63,10 @@ public class AccountHolderService
 
         try
         {
-            var index = GlobalData.AccountHolders.FindIndex(accHolder => accHolder.Id == accountHolder.Id);
-            if (index > -1)
-            {
-                GlobalData.AccountHolders[index] = accountHolder;
-                apiResponse.Message = "Successfully deposited.";
-                apiResponse.IsSuccess = true;
-            }
+            _context.AccountHolders.Where(accHolder => accHolder.Id == accountHolder.Id).ToList().Select(w => accountHolder);
+            _context.SaveChanges();
+            apiResponse.Message = "Successfully deposited.";
+            apiResponse.IsSuccess = true;   
         }
         catch (Exception ex)
         {
@@ -80,13 +83,11 @@ public class AccountHolderService
 
         try
         {
-            var index = GlobalData.AccountHolders.FindIndex(accHolder => accHolder.Id == accountHolder.Id);
-            if (index > -1)
-            {
-                GlobalData.AccountHolders[index] = accountHolder;
-                apiResponse.Message = "Successful Withdraw.";
-                apiResponse.IsSuccess = true;
-            }
+            
+            _context.AccountHolders.Where(accHolder => accHolder.Id == accountHolder.Id).Select(w => accountHolder);
+            _context.SaveChanges();
+            apiResponse.Message = "Successful Withdraw.";
+            apiResponse.IsSuccess = true;
         }
         catch (Exception ex)
         {
@@ -186,12 +187,17 @@ public class AccountHolderService
             newTransaction.Type = true;
             transferFund.DstAccountHolder.Balance += transferFund.OriginalAmount;
             transferFund.SrcAccountHolder.Balance -= transferFund.NewAmount;
-            GlobalData.Transactions.Add(transaction);
-            GlobalData.Transactions.Add(newTransaction);
+            //GlobalData.Transactions.Add(transaction);
+            //GlobalData.Transactions.Add(newTransaction);
+            _context.Transactions.Add(transaction);
+            _context.SaveChanges();
+            _context.Transactions.Add(newTransaction);
+            _context.SaveChanges();
             apiResponse = Utility.SetApiMessage(true, "Successfully transferred the money");
         }
         catch (Exception ex)
         {
+            WriteLine(ex);
             apiResponse = Utility.SetApiMessage(false, "Some error occured please try again");
         }
 

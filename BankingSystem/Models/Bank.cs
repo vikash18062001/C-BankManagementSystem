@@ -13,13 +13,13 @@
 
     public string Name { get; set; }
 
-    public double RTGSSame;
+    public double RTGSSame { get; set; }
 
-    public double RTGSDiff;
+    public double RTGSDiff { get; set; }
 
-    public double IMPSSame;
+    public double IMPSSame { get; set; }
 
-    public double IMPSDiff;
+    public double IMPSDiff { get; set; }
 
     public string CreatedBy { get; set; }
 

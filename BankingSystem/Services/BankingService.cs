@@ -2,12 +2,9 @@
 using static System.Console;
 using System;
 using System.Net.Http.Json;
-using BankingSystem.Services;
-using BankingSystemAPI.Models;
-//using BankingSystem.BankingSystemAPI.Models;
 using BankingSystem.Models;
-using System.Text.Json.Serialization;
-//using BankingSystemAPI.Models;
+
+
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -15,15 +12,12 @@ public class BankingService
 {
     AccountHolderService AccountHolderService = new AccountHolderService();
 
-    private readonly BankingDbContext _context = new BankingDbContext();
+    //not able to use dependency injection
+    private static readonly  BankingDbContext _context = new BankingDbContext();
 
-    //public BankingService()
-    //{
-    //}
-    //public BankingService(BankingDbContext context)
-    //{
-    //    this._context = context;
-    //}
+    public BankingService()
+    {
+    }
 
     public APIResponse Deposit(Transaction transaction)
     {
@@ -35,7 +29,9 @@ public class BankingService
             {
                 accountHolder.Balance += transaction.Amount;
                 apiResponse = AccountHolderService.UpdateAccountHolderAfterDeposit(accountHolder);
-                GlobalData.Transactions.Add(transaction);
+                //GlobalData.Transactions.Add(transaction);
+                _context.Transactions.Add(transaction);
+                _context.SaveChanges();
             }
             else
             {
@@ -64,7 +60,9 @@ public class BankingService
                 }
                 accountHolder.Balance -= transaction.Amount;
                 apiResponse = this.AccountHolderService.UpdateAccountHolderAfterWithdraw(accountHolder);
-                GlobalData.Transactions.Add(transaction);
+                //GlobalData.Transactions.Add(transaction);
+                _context.Transactions.Add(transaction);
+                _context.SaveChanges();
             }
             else
             {
@@ -82,28 +80,13 @@ public class BankingService
 
     public Bank CreateBank(Bank bank)
     {
-        APIServices<Bank> apiService = new APIServices<Bank>();
         try
         {
             bank.Id = this.GenerateBankId(bank.Name);
-            BankModel bank2 = new BankModel(){
-                Id = "visadkfaslflsajflsja",
-                Name = "Vikash",
-                RTGSDiff = 0,
-                RTGSSame = 0,
-                CreatedBy = "asdf",
-                CreatedOn = new DateTime(),
-                IMPSDiff = 0,
-                IMPSSame = 0
-            };
-            //string bankString = JsonSerializer.Serialize(bank2);
-            //BankModel bank1 = JsonSerializer.Deserialize<BankModel>(bankString);
 
             if (!string.IsNullOrEmpty(bank.Id) && !string.IsNullOrEmpty(bank.Name) && !string.IsNullOrEmpty(bank.CreatedBy))
             {
-                //apiService.Post("bankCreation", bank); // making the post request for bank creation
-                WriteLine(_context);
-                _context.Banks.Add(bank2);
+                _context.Banks.Add(bank);
                 _context.SaveChanges();
             }
         }
@@ -119,12 +102,13 @@ public class BankingService
     public APIResponse AddBankEmployee(Employee employee)
     {
         APIResponse apiResponse = new APIResponse();
-        APIServices<Employee> apiService = new APIServices<Employee>();
+
         try
         {
             //var response = apiService.Post("employeeCreation", employee);
-            
 
+            _context.Employees.Add(employee);
+            _context.SaveChanges();
             apiResponse = Utility.SetApiMessage(true, $"Successfully added the employee.The employee Id is {employee.Id}");
         }
         catch (Exception e)
@@ -135,15 +119,15 @@ public class BankingService
         return apiResponse;
     }
 
-    public APIResponse CreateAccount(AccountHolder AccountHolder)
+    public APIResponse CreateAccount(AccountHolder accountHolder)
     {
         APIResponse apiResponse = new APIResponse();
-        APIServices<AccountHolder> apiService = new APIServices<AccountHolder>();
         try
         {
-            AccountHolder.Id = AccountService.GenerateAccountId(AccountHolder.Name);
+            accountHolder.Id = AccountService.GenerateAccountId(accountHolder.Name);
             //GlobalData.AccountHolders.Add(AccountHolder);
-            apiService.Post("accountCreation",AccountHolder);
+            _context.AccountHolders.Add(accountHolder);
+            _context.SaveChanges();
 
             apiResponse = Utility.SetApiMessage(true, "Successfully created the account");
         }
@@ -161,7 +145,7 @@ public class BankingService
         APIResponse apiResponse = new APIResponse();
         try
         {
-            List<AccountHolder> accountHolders = (from account in GlobalData.AccountHolders where account.Id == id select account).ToList<AccountHolder>();
+            List<AccountHolder> accountHolders = (from account in _context.AccountHolders where account.Id == id select account).ToList<AccountHolder>();
 
             if (accountHolders.Count() == 0)
                 apiResponse = Utility.SetApiMessage(false, "Please check the id ");
@@ -169,6 +153,7 @@ public class BankingService
             {
                 accountHolders.First().Email = updatedDetails["Email"].ToString()!;
                 accountHolders.First().Mobile = updatedDetails["Mobile"].ToString()!;
+                _context.SaveChanges();
                 apiResponse = Utility.SetApiMessage(true, "Updation is successful");
             }
         }
@@ -186,17 +171,24 @@ public class BankingService
         APIResponse apiResponse = new APIResponse();
         try
         {
-            GlobalData.AccountHolders.RemoveAll(r =>
+            List<AccountHolder> accountHolder = _context.AccountHolders.Where(account => account.Id == id).ToList<AccountHolder>();
+            if (accountHolder.Count > 0)
             {
-                if (r.Id == id)
-                {
-                    apiResponse = Utility.SetApiMessage(true, "Successful deletion");
-                    return true;
-                }
-                return false;
-            });
-            if (apiResponse.IsSuccess)
-                apiResponse = DeleteTransactinon(id);
+                _context.AccountHolders.Remove(accountHolder.First());
+                _context.SaveChanges();
+                apiResponse = Utility.SetApiMessage(true, "Successful deletion");
+            }
+            //GlobalData.AccountHolders.RemoveAll(r =>
+            //{
+            //    if (r.Id == id)
+            //    {
+            //        apiResponse = Utility.SetApiMessage(true, "Successful deletion");
+            //        return true;
+            //    }
+            //    return false;
+            //});
+            //if (apiResponse.IsSuccess)
+            //    apiResponse = DeleteTransactinon(id);
             else
                 apiResponse = Utility.SetApiMessage(false, "Unsuccessful Deletion");
         }
@@ -214,7 +206,7 @@ public class BankingService
         List<Transaction> userTranasactions = new List<Transaction>();
         try
         {
-            foreach (Transaction transaction in GlobalData.Transactions)
+            foreach (Transaction transaction in _context.Transactions)
             {
                 endIndex = transaction.Id.IndexOf('/', startIndex = transaction.Id.IndexOf('/') + 1);
                 string retrivedBankId = transaction.Id.Substring(startIndex, endIndex - startIndex);
@@ -239,7 +231,7 @@ public class BankingService
         APIResponse apiResponse = new APIResponse();
         try
         {
-            List<Transaction> transactions = (from trans in GlobalData.Transactions where trans.Id == transId select trans).ToList<Transaction>();
+            List<Transaction> transactions = (from trans in _context.Transactions where trans.Id == transId select trans).ToList<Transaction>();
             if (transactions.Count() == 0)
             {
                 return Utility.SetApiMessage(false, "Revert is unsucessful please check the id");
@@ -267,7 +259,12 @@ public class BankingService
         APIResponse apiResponse = new APIResponse();
         try
         {
-            GlobalData.Transactions.RemoveAll(r => (r.Id == transId));
+            List<Transaction> transactions = (from transaction in _context.Transactions where transaction.Id == transId select transaction).ToList<Transaction>();
+            foreach(var trans in transactions)
+            {
+                _context.Transactions.Remove(trans);
+                _context.SaveChanges();
+            }
             apiResponse = Utility.SetApiMessage(true, "Successful Deletion");
         }
         catch
@@ -310,7 +307,7 @@ public class BankingService
         APIResponse apiResponse = new APIResponse();
         try
         {
-            bool isValid = (from account in GlobalData.AccountHolders where account.BankId == bankId && account.Id == accountId select account).Any();
+            bool isValid = (from account in _context.AccountHolders where account.BankId == bankId && account.Id == accountId select account).Any();
             if (isValid)
                 apiResponse = Utility.SetApiMessage(true, "Found the account ");
             else
@@ -370,7 +367,7 @@ public class BankingService
     {
         try
         {
-            List<Employee> employee = (from emp in GlobalData.Employees where emp.Id == empId select emp).ToList<Employee>();
+            List<Employee> employee = (from emp in _context.Employees where emp.Id == empId select emp).ToList<Employee>();
             if (employee.Count != 0)
             {
                 return employee.First().BankId;
@@ -384,11 +381,11 @@ public class BankingService
         }
     }
 
-    public static Bank GetBankDetail(string? id)
+    public static Bank GetBankDetail(string? id) // changed from static to normal
     {
         try
         {
-            List<Bank> newId = (from bank in GlobalData.Banks where bank.Id == id select bank).ToList<Bank>();
+            List<Bank> newId = (from bank in _context.Banks where bank.Id == id select bank).ToList<Bank>();
             if (newId.Count == 0)
                 return new Bank();
 

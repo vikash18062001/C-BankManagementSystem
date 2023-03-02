@@ -101,7 +101,7 @@ public class BankingStaff
         AccountHolder accountHolder = this.GetAccountHolder(login);
         if (string.IsNullOrEmpty(accountHolder.Id))
             return;
-
+        
         APIResponse apiResponse = BankingService.checkIfValidIdsOrNot(accountHolder.BankId, accountHolder.Id);
         WriteLine(apiResponse.Message);
         if (!apiResponse.IsSuccess)

@@ -31,5 +31,5 @@
 
     public string CreatedBy { get; set; }
 
-    public DateTime CreatedOn;
+    public DateTime CreatedOn { get; set; }
 }
